@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Firefox CI: Suite x Worker-Type Matrix</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #1a1a2e;
+    color: #ccc;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 13px;
+    padding: 20px;
+  }
+  h1 {
+    color: white;
+    font-size: 22px;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    color: #888;
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+  .os-legend {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 16px;
+    font-size: 13px;
+  }
+  .os-legend span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .dot-legend {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .table-wrapper {
+    overflow-x: auto;
+    max-width: 100%;
+  }
+  table {
+    border-collapse: collapse;
+    white-space: nowrap;
+  }
+  th, td {
+    padding: 3px 6px;
+    text-align: center;
+    border: 1px solid #2a2a4a;
+  }
+  th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #16213e;
+  }
+  th.suite-header {
+    text-align: left;
+    font-weight: normal;
+    min-width: 280px;
+    position: sticky;
+    left: 0;
+    z-index: 20;
+    background: #16213e;
+  }
+  th.count-header {
+    position: sticky;
+    right: 0;
+    z-index: 20;
+    background: #16213e;
+    color: #aaa;
+    min-width: 30px;
+  }
+  th.wt-header {
+    writing-mode: vertical-lr;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    font-weight: normal;
+    font-size: 11px;
+    padding: 8px 4px;
+    height: 180px;
+    vertical-align: bottom;
+  }
+  th.os-group-header {
+    font-weight: bold;
+    font-size: 14px;
+    border-bottom: 2px solid;
+    padding: 6px 4px;
+  }
+  td.suite-name {
+    text-align: left;
+    position: sticky;
+    left: 0;
+    background: inherit;
+    z-index: 5;
+    font-size: 12px;
+  }
+  td.count-cell {
+    position: sticky;
+    right: 0;
+    background: inherit;
+    z-index: 5;
+    color: #aaa;
+    font-size: 11px;
+  }
+  tr:nth-child(even) { background: #1e2a4a; }
+  tr:nth-child(odd) { background: #16213e; }
+  tr:hover { background: #2a3a5a !important; }
+  tr.section-header td {
+    background: #0d1525 !important;
+    font-weight: bold;
+    font-size: 13px;
+    color: #ddd;
+    padding: 8px 6px;
+    text-align: left;
+    border-top: 2px solid #444;
+  }
+  .dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .empty {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    display: inline-block;
+    background: #2a2a3a;
+  }
+  .linux { background: #4A90D9; }
+  .windows { background: #7B68EE; }
+  .macos { background: #E88D39; }
+  .android { background: #50C878; }
+
+  .risk-high { color: #E74C3C; font-weight: bold; }
+  .risk-med { color: #F39C12; }
+  .risk-low { color: #27AE60; }
+</style>
+</head>
+<body>
+
+<h1>Firefox CI: Suite x Worker-Type Matrix</h1>
+<p class="subtitle">Each dot = suite runs on that worker-type. Rows with few dots = narrow coverage. Empty rows = no coverage anywhere.</p>
+
+<div class="os-legend">
+  <span><span class="dot-legend linux"></span> Linux</span>
+  <span><span class="dot-legend windows"></span> Windows</span>
+  <span><span class="dot-legend macos"></span> macOS</span>
+  <span><span class="dot-legend android"></span> Android</span>
+</div>
+
+<div class="table-wrapper">
+<table id="matrix">
+</table>
+</div>
+
+<script>
+const data = {"worker_types": ["t-bitbar-gw-unit-p5", "t-bitbar-gw-unit-p6", "t-bitbar-gw-unit-s24", "t-lambda-perf-a55", "t-linux-docker-noscratch-amd", "t-linux-kvm", "t-linux-netperf-1804", "t-linux-netperf-2404", "t-linux-talos-1804", "t-linux-talos-2404", "t-linux-wayland", "t-osx-1015-r8", "t-osx-1400-r8", "t-osx-1500-m4", "win10-64-2009", "win11-64-24h2", "win11-64-24h2-gpu", "win11-64-24h2-hw", "win11-64-24h2-hw-ref", "win11-a64-24h2"], "suites": ["awsy", "awsy-base", "awsy-base-dmd", "awsy-dmd", "awsy-tp6", "browsertime-benchmark", "browsertime-benchmark-jetstream2", "browsertime-benchmark-jetstream3", "browsertime-benchmark-motionmark-1-3", "browsertime-benchmark-speedometer2-mobile", "browsertime-benchmark-speedometer3-mobile", "browsertime-benchmark-unity-webgl-mobile", "browsertime-benchmark-wasm", "browsertime-custom", "browsertime-first-install", "browsertime-indexeddb", "browsertime-network-bench", "browsertime-pageload-benchmark", "browsertime-regression-tests", "browsertime-responsiveness", "browsertime-speculative", "browsertime-throttled", "browsertime-tp6", "browsertime-tp6-bytecode", "browsertime-tp6-essential", "browsertime-tp6-live", "browsertime-tp6-live-sheriffed", "browsertime-tp6-profiling", "browsertime-tp6-webextensions", "browsertime-tp6m", "browsertime-tp6m-essential", "browsertime-tp6m-live", "browsertime-tp6m-webextensions", "browsertime-tp7", "browsertime-trr-performance", "browsertime-trr-performance-m", "browsertime-upload", "browsertime-video-playback-latency", "browsertime-video-playback-latency-mobile", "browsertime-webcodecs", "browsertime-youtube-playback", "browsertime-youtube-playback-mobile", "browsertime-youtube-playback-power", "browsertime-youtube-playback-power-mobile", "cppunittest", "crashtest", "crashtest-qr", "firefox-ui-functional", "geckoview-junit", "gtest", "jittest", "jittest-all", "jsreftest", "marionette-integration", "marionette-unittest", "mochitest-a11y", "mochitest-browser-a11y", "mochitest-browser-chrome", "mochitest-browser-chrome-failures", "mochitest-browser-media", "mochitest-browser-screenshots", "mochitest-browser-translations", "mochitest-chrome", "mochitest-chrome-gpu", "mochitest-devtools-chrome", "mochitest-media", "mochitest-plain", "mochitest-plain-gpu", "mochitest-remote", "mochitest-webgl1-core", "mochitest-webgl1-ext", "mochitest-webgl2-core", "mochitest-webgl2-ext", "mochitest-webgpu", "reftest", "reftest-qr", "talos-bcv", "talos-bcv-profiling", "talos-chrome", "talos-chrome-profiling", "talos-damp-inspector", "talos-damp-other", "talos-damp-webconsole", "talos-dromaeojs", "talos-dromaeojs-profiling", "talos-g1", "talos-g1-profiling", "talos-g3", "talos-g3-profiling", "talos-g4", "talos-g4-profiling", "talos-g5", "talos-g5-profiling", "talos-motionmark-profiling", "talos-other", "talos-other-profiling", "talos-pdfpaint", "talos-perf-reftest", "talos-perf-reftest-profiling", "talos-perf-reftest-singletons", "talos-perf-reftest-singletons-profiling", "talos-realworld-webextensions", "talos-realworld-webextensions-profiling", "talos-sessionrestore-many-windows", "talos-sessionrestore-many-windows-profiling", "talos-svgr", "talos-svgr-profiling", "talos-tabswitch", "talos-tabswitch-profiling", "talos-tp5o", "talos-tp5o-profiling", "talos-webgl", "talos-webgl-profiling", "talos-xperf", "telemetry-tests-client", "test-coverage", "test-coverage-wpt", "test-verify", "test-verify-gpu", "test-verify-wpt", "web-platform-tests", "web-platform-tests-backlog", "web-platform-tests-canvas", "web-platform-tests-crashtest", "web-platform-tests-eme", "web-platform-tests-print-reftest", "web-platform-tests-reftest", "web-platform-tests-reftest-backlog", "web-platform-tests-wdspec", "web-platform-tests-webcodecs", "web-platform-tests-webgpu", "web-platform-tests-webgpu-backlog", "web-platform-tests-webgpu-backlog-long", "web-platform-tests-webgpu-long", "xpcshell"], "matrix": [[0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0], [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0], [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1], [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0], [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0], [1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0], [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0], [0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0], [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0], [0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0], [0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0], [0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0], [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0], [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 1, 0, 0, 0], [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0], [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0]]};
+
+const osColors = {
+  'Linux': 'linux',
+  'Windows': 'windows',
+  'macOS': 'macos',
+  'Android': 'android'
+};
+
+function classifyOs(wt) {
+  if (wt.includes('linux') || wt.includes('kvm') || wt.includes('netperf')) return 'Linux';
+  if (wt.includes('win')) return 'Windows';
+  if (wt.includes('osx')) return 'macOS';
+  if (wt.includes('bitbar') || wt.includes('lambda')) return 'Android';
+  return 'Other';
+}
+
+function classifySuite(s) {
+  if (s.startsWith('talos-') || s.startsWith('browsertime-')) return 'perf';
+  if (s.startsWith('awsy')) return 'other';
+  return 'func';
+}
+
+const workerTypes = data.worker_types;
+const suites = data.suites;
+const matrix = data.matrix;
+
+// Group worker-types by OS
+const osOrder = ['Linux', 'Windows', 'macOS', 'Android'];
+const wtByOs = {};
+osOrder.forEach(os => wtByOs[os] = []);
+workerTypes.forEach((wt, idx) => {
+  const os = classifyOs(wt);
+  if (wtByOs[os]) wtByOs[os].push({name: wt, idx: idx});
+});
+
+// Ordered wt indices
+const orderedWts = [];
+osOrder.forEach(os => wtByOs[os].forEach(w => orderedWts.push(w)));
+
+// Group suites by category
+const suiteCats = {perf: [], func: [], other: []};
+suites.forEach((s, i) => {
+  const cat = classifySuite(s);
+  const count = orderedWts.reduce((sum, w) => sum + matrix[i][w.idx], 0);
+  suiteCats[cat].push({name: s, idx: i, count: count});
+});
+
+// Sort each category by count ascending (fewest coverage first = most at risk)
+Object.values(suiteCats).forEach(arr => arr.sort((a, b) => a.count - b.count));
+
+const table = document.getElementById('matrix');
+
+// Build header rows
+// OS group header
+let osHeaderRow = '<tr><th class="suite-header"></th>';
+osOrder.forEach(os => {
+  const count = wtByOs[os].length;
+  const color = os === 'Linux' ? '#4A90D9' : os === 'Windows' ? '#7B68EE' : os === 'macOS' ? '#E88D39' : '#50C878';
+  osHeaderRow += `<th class="os-group-header" colspan="${count}" style="color:${color}; border-bottom-color:${color}">${os}</th>`;
+});
+osHeaderRow += '<th class="count-header">#</th></tr>';
+
+// Worker-type header
+let wtHeaderRow = '<tr><th class="suite-header" style="font-size:11px; color:#888;">Suite</th>';
+orderedWts.forEach(w => {
+  const os = classifyOs(w.name);
+  const cls = osColors[os] || '';
+  wtHeaderRow += `<th class="wt-header" style="color:${os === 'Linux' ? '#4A90D9' : os === 'Windows' ? '#7B68EE' : os === 'macOS' ? '#E88D39' : '#50C878'}">${w.name}</th>`;
+});
+wtHeaderRow += '<th class="count-header">#</th></tr>';
+
+const thead = osHeaderRow + wtHeaderRow;
+
+function riskClass(count) {
+  if (count <= 1) return 'risk-high';
+  if (count <= 3) return 'risk-med';
+  return 'risk-low';
+}
+
+function buildSuiteRows(suiteList) {
+  let html = '';
+  suiteList.forEach(s => {
+    html += '<tr>';
+    html += `<td class="suite-name">${s.name}</td>`;
+    orderedWts.forEach(w => {
+      if (matrix[s.idx][w.idx]) {
+        const os = classifyOs(w.name);
+        const cls = osColors[os] || '';
+        html += `<td><span class="dot ${cls}"></span></td>`;
+      } else {
+        html += `<td><span class="empty"></span></td>`;
+      }
+    });
+    html += `<td class="count-cell ${riskClass(s.count)}">${s.count}</td>`;
+    html += '</tr>';
+  });
+  return html;
+}
+
+function sectionRow(label, count) {
+  const colspan = orderedWts.length + 2;
+  return `<tr class="section-header"><td colspan="${colspan}">${label} (${count} suites)</td></tr>`;
+}
+
+let tbody = '';
+tbody += sectionRow('Performance (Talos / Browsertime)', suiteCats.perf.length);
+tbody += buildSuiteRows(suiteCats.perf);
+tbody += sectionRow('Functional (Mochitest / WPT / xpcshell / etc)', suiteCats.func.length);
+tbody += buildSuiteRows(suiteCats.func);
+tbody += sectionRow('Other (AWSY)', suiteCats.other.length);
+tbody += buildSuiteRows(suiteCats.other);
+
+table.innerHTML = thead + tbody;
+</script>
+
+</body>
+</html>

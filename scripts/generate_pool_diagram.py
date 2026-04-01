@@ -15,10 +15,10 @@ import matplotlib.patches as mpatches
 import numpy as np
 from pathlib import Path
 
-BASE = Path(__file__).parent
+BASE = Path(__file__).parent.parent
 
 # Load coverage map
-with open(BASE / "coverage_map.json") as f:
+with open(BASE / "docs" / "coverage_map.json") as f:
     cov_data = json.load(f)
 
 # Load pool definitions
@@ -190,7 +190,7 @@ fig.legend(handles=legend_elements, loc="lower center", ncol=3,
            fontsize=12, facecolor="#1a1a2e", edgecolor="#444444",
            labelcolor="white", framealpha=0.9)
 
-out_path = BASE / "pool_coverage_diagram.png"
+out_path = BASE / "docs" / "pool_coverage_diagram.png"
 plt.savefig(out_path, dpi=150, bbox_inches="tight", facecolor=fig.get_facecolor())
 plt.close()
 print(f"Pool diagram saved to: {out_path}")

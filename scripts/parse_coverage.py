@@ -19,7 +19,7 @@ import json
 from collections import defaultdict
 from pathlib import Path
 
-BASE = Path(__file__).parent
+BASE = Path(__file__).parent.parent  # scripts/ is one level down from project root
 FIREFOX = BASE / "firefox"
 FXCI = BASE / "fxci-config"
 
@@ -129,6 +129,102 @@ def load_yaml(path):
         return yaml.safe_load(f)
 
 
+def parse_kinds_worker_type_overrides():
+    """Parse kinds/test/*.yml and other test kind files for worker-type overrides.
+
+    These overrides take precedence over worker.py logic. Returns a list of:
+      (suite_names_set, regex_pattern, worker_type, source_file)
+
+    For task-defaults overrides, suite_names_set contains all suites defined in that file.
+    For per-suite overrides, it contains just that suite.
+    """
+    overrides = []
+    kinds_dirs = [
+        FIREFOX / "taskcluster/kinds/test",
+        FIREFOX / "taskcluster/kinds/web-platform-tests",
+        FIREFOX / "taskcluster/kinds/mochitest",
+        FIREFOX / "taskcluster/kinds/reftest",
+        FIREFOX / "taskcluster/kinds/browsertime",
+    ]
+
+    for kinds_dir in kinds_dirs:
+        if not kinds_dir.exists():
+            continue
+        for yml_file in kinds_dir.glob("*.yml"):
+            try:
+                data = load_yaml(yml_file)
+            except Exception:
+                continue
+            if not isinstance(data, dict):
+                continue
+
+            # Collect all suite names defined in this file
+            file_suites = set()
+            for key, val in data.items():
+                if key not in ("task-defaults", "tasks-from", "loader",
+                               "kind-dependencies", "transforms") and isinstance(val, dict):
+                    file_suites.add(key)
+
+            # Check task-defaults for worker-type overrides
+            # These apply ONLY to suites defined in this same file
+            defaults = data.get("task-defaults", {})
+            if isinstance(defaults, dict):
+                wt = defaults.get("worker-type")
+                if isinstance(wt, dict) and "by-test-platform" in wt:
+                    for pattern, worker_type in wt["by-test-platform"].items():
+                        if isinstance(worker_type, str) and worker_type != "default":
+                            overrides.append((file_suites, pattern, worker_type, yml_file.name))
+                elif isinstance(wt, dict):
+                    for variant_key, variant_val in wt.items():
+                        if isinstance(variant_val, dict) and "by-test-platform" in variant_val:
+                            for pattern, worker_type in variant_val["by-test-platform"].items():
+                                if isinstance(worker_type, str) and worker_type != "default":
+                                    overrides.append((file_suites, pattern, worker_type, yml_file.name))
+
+            # Check individual suite definitions for worker-type overrides
+            for suite_name, suite_config in data.items():
+                if suite_name in ("task-defaults", "tasks-from") or not isinstance(suite_config, dict):
+                    continue
+                wt = suite_config.get("worker-type")
+                if isinstance(wt, str) and wt != "default":
+                    overrides.append(({suite_name}, ".*", wt, yml_file.name))
+                elif isinstance(wt, dict) and "by-test-platform" in wt:
+                    for pattern, worker_type in wt["by-test-platform"].items():
+                        if isinstance(worker_type, str) and worker_type != "default":
+                            overrides.append(({suite_name}, pattern, worker_type, yml_file.name))
+
+    return overrides
+
+
+_KINDS_OVERRIDES = None
+
+
+def get_kinds_overrides():
+    global _KINDS_OVERRIDES
+    if _KINDS_OVERRIDES is None:
+        _KINDS_OVERRIDES = parse_kinds_worker_type_overrides()
+    return _KINDS_OVERRIDES
+
+
+def check_kinds_override(test_platform, suite_name):
+    """Check if a kinds override applies for this (platform, suite).
+
+    Returns the worker-type string if found, None otherwise.
+    Only matches if the suite is in the set of suites the override applies to.
+    """
+    overrides = get_kinds_overrides()
+
+    for applicable_suites, pattern, worker_type, source in overrides:
+        if suite_name in applicable_suites:
+            try:
+                if re.match(pattern, test_platform):
+                    return worker_type
+            except re.error:
+                continue
+
+    return None
+
+
 def parse_test_platforms():
     data = load_yaml(FIREFOX / "taskcluster/test_configs/test-platforms.yml")
     platforms = {}
@@ -173,7 +269,17 @@ def get_virtualization(suite_name):
 
 
 def resolve_worker_type(test_platform, suite_name, build_platform=""):
-    """Resolve a (platform, suite) pair to its worker-type."""
+    """Resolve a (platform, suite) pair to its worker-type.
+
+    Priority:
+      1. Kinds overrides (from kinds/test/*.yml etc.) — highest priority
+      2. worker.py logic — fallback
+    """
+    # Check kinds overrides first — they take precedence
+    kinds_wt = check_kinds_override(test_platform, suite_name)
+    if kinds_wt is not None:
+        return kinds_wt
+
     platform_base = test_platform.split("/")[0]
     virtualization = get_virtualization(suite_name)
     harness = get_suite_harness(suite_name)
@@ -275,6 +381,10 @@ def build_coverage_map():
     print("Parsing worker-pools.yml...")
     worker_pools = parse_worker_pools()
     print(f"  Found {len(worker_pools)} expanded pools")
+
+    print("Parsing kinds worker-type overrides...")
+    overrides = get_kinds_overrides()
+    print(f"  Found {len(overrides)} override rules")
 
     # Resolve each (platform, suite) -> worker-type
     print("\nResolving (platform, suite) -> worker-type...")
@@ -420,7 +530,7 @@ def save_json_output(wt_coverage, platform_suites, worker_pools):
         },
     }
 
-    out_path = BASE / "coverage_map.json"
+    out_path = BASE / "docs" / "coverage_map.json"
     with open(out_path, "w") as f:
         json.dump(output, f, indent=2)
     print(f"\nJSON output saved to: {out_path}")

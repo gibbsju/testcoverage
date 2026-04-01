@@ -13,7 +13,7 @@ import json
 from collections import defaultdict
 from pathlib import Path
 
-BASE = Path(__file__).parent
+BASE = Path(__file__).parent.parent
 FIREFOX = BASE / "firefox"
 
 OS_LIST = ["linux", "win", "mac", "android"]
@@ -190,7 +190,7 @@ def main():
 
     # Build HTML
     html = build_html(manifest_groups, total_tests, total_skipped_all)
-    out = BASE / "test_skip_matrix.html"
+    out = BASE / "docs" / "test_skip_matrix.html"
     out.write_text(html, encoding="utf-8")
     print(f"\nHTML saved to: {out}")
 

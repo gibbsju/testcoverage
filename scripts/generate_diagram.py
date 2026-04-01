@@ -11,9 +11,9 @@ from matplotlib.gridspec import GridSpec
 import numpy as np
 from pathlib import Path
 
-BASE = Path(__file__).parent
+BASE = Path(__file__).parent.parent
 
-with open(BASE / "coverage_map.json") as f:
+with open(BASE / "docs" / "coverage_map.json") as f:
     data = json.load(f)
 
 wt_data = data["worker_type_coverage"]
@@ -128,7 +128,7 @@ fig.legend(handles=legend_elements, loc="lower center", ncol=3,
            fontsize=11, facecolor="#1a1a2e", edgecolor="#444444",
            labelcolor="white", framealpha=0.9)
 
-out_path = BASE / "coverage_map_diagram.png"
+out_path = BASE / "docs" / "coverage_map_diagram.png"
 plt.savefig(out_path, dpi=150, bbox_inches="tight", facecolor=fig.get_facecolor())
 plt.close()
 print(f"Diagram saved to: {out_path}")

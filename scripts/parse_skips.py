@@ -15,7 +15,7 @@ import json
 from collections import defaultdict
 from pathlib import Path
 
-BASE = Path(__file__).parent
+BASE = Path(__file__).parent.parent
 FIREFOX = BASE / "firefox"
 
 # OS values used in skip-if conditions
@@ -257,7 +257,7 @@ def save_skip_json(results):
         "unresolved_count": results["unresolved_count"],
     }
 
-    out_path = BASE / "skip_matrix.json"
+    out_path = BASE / "docs" / "skip_matrix.json"
     with open(out_path, "w") as f:
         json.dump(summary, f, indent=2)
     print(f"\nJSON output saved to: {out_path}")

@@ -5,9 +5,9 @@ Generate the suite x worker-type matrix as a markdown table.
 import json
 from pathlib import Path
 
-BASE = Path(__file__).parent
+BASE = Path(__file__).parent.parent
 
-with open(BASE / "coverage_map.json") as f:
+with open(BASE / "docs" / "coverage_map.json") as f:
     cov_data = json.load(f)
 
 wt_data = cov_data["worker_type_coverage"]

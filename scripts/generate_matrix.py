@@ -10,9 +10,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from pathlib import Path
 
-BASE = Path(__file__).parent
+BASE = Path(__file__).parent.parent
 
-with open(BASE / "coverage_map.json") as f:
+with open(BASE / "docs" / "coverage_map.json") as f:
     cov_data = json.load(f)
 
 wt_data = cov_data["worker_type_coverage"]
@@ -127,7 +127,7 @@ ax.spines["left"].set_visible(False)
 
 plt.subplots_adjust(left=0.22, right=0.95, top=0.96, bottom=0.08)
 
-out = BASE / "diagram_suite_matrix.png"
+out = BASE / "docs" / "diagram_suite_matrix.png"
 plt.savefig(out, dpi=150, bbox_inches="tight", facecolor=fig.get_facecolor())
 plt.close()
 print(f"Matrix diagram saved to: {out}")

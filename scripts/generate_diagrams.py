@@ -12,9 +12,9 @@ import matplotlib.patches as mpatches
 import numpy as np
 from pathlib import Path
 
-BASE = Path(__file__).parent
+BASE = Path(__file__).parent.parent
 
-with open(BASE / "coverage_map.json") as f:
+with open(BASE / "docs" / "coverage_map.json") as f:
     cov_data = json.load(f)
 
 wt_data = cov_data["worker_type_coverage"]
@@ -118,7 +118,7 @@ def gen_worker_type_diagram():
     fig.legend(handles=legend_elements, loc="lower center", ncol=3, fontsize=11,
                facecolor="#1a1a2e", edgecolor="#444444", labelcolor="white", framealpha=0.9)
 
-    out = BASE / "diagram_worker_types.png"
+    out = BASE / "docs" / "diagram_worker_types.png"
     plt.savefig(out, dpi=150, bbox_inches="tight", facecolor=fig.get_facecolor())
     plt.close()
     print(f"Worker-type diagram saved to: {out}")
@@ -170,7 +170,7 @@ def gen_test_platform_diagram():
     fig.legend(handles=legend_elements, loc="lower center", ncol=3, fontsize=11,
                facecolor="#1a1a2e", edgecolor="#444444", labelcolor="white", framealpha=0.9)
 
-    out = BASE / "diagram_test_platforms.png"
+    out = BASE / "docs" / "diagram_test_platforms.png"
     plt.savefig(out, dpi=150, bbox_inches="tight", facecolor=fig.get_facecolor())
     plt.close()
     print(f"Test platform diagram saved to: {out}")

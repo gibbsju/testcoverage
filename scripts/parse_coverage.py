@@ -137,6 +137,10 @@ def parse_kinds_worker_type_overrides():
 
     For task-defaults overrides, suite_names_set contains all suites defined in that file.
     For per-suite overrides, it contains just that suite.
+
+    Handles two file formats:
+      - Flat: suites at top level (e.g., kinds/test/compiled.yml)
+      - Nested: suites under a 'tasks' key (e.g., kinds/mochitest/kind.yml)
     """
     overrides = []
     kinds_dirs = [
@@ -146,6 +150,9 @@ def parse_kinds_worker_type_overrides():
         FIREFOX / "taskcluster/kinds/reftest",
         FIREFOX / "taskcluster/kinds/browsertime",
     ]
+
+    METADATA_KEYS = {"task-defaults", "tasks-from", "loader",
+                     "kind-dependencies", "transforms", "tasks"}
 
     for kinds_dir in kinds_dirs:
         if not kinds_dir.exists():
@@ -158,12 +165,22 @@ def parse_kinds_worker_type_overrides():
             if not isinstance(data, dict):
                 continue
 
-            # Collect all suite names defined in this file
+            # Collect all suite names — handle both flat and tasks-nested formats
             file_suites = set()
-            for key, val in data.items():
-                if key not in ("task-defaults", "tasks-from", "loader",
-                               "kind-dependencies", "transforms") and isinstance(val, dict):
-                    file_suites.add(key)
+            suite_configs = {}  # suite_name -> config dict
+
+            if "tasks" in data and isinstance(data["tasks"], dict):
+                # Nested format: suites under 'tasks' key
+                for key, val in data["tasks"].items():
+                    if isinstance(val, dict):
+                        file_suites.add(key)
+                        suite_configs[key] = val
+            else:
+                # Flat format: suites at top level
+                for key, val in data.items():
+                    if key not in METADATA_KEYS and isinstance(val, dict):
+                        file_suites.add(key)
+                        suite_configs[key] = val
 
             # Check task-defaults for worker-type overrides
             # These apply ONLY to suites defined in this same file
@@ -182,8 +199,8 @@ def parse_kinds_worker_type_overrides():
                                     overrides.append((file_suites, pattern, worker_type, yml_file.name))
 
             # Check individual suite definitions for worker-type overrides
-            for suite_name, suite_config in data.items():
-                if suite_name in ("task-defaults", "tasks-from") or not isinstance(suite_config, dict):
+            for suite_name, suite_config in suite_configs.items():
+                if not isinstance(suite_config, dict):
                     continue
                 wt = suite_config.get("worker-type")
                 if isinstance(wt, str) and wt != "default":

@@ -1,0 +1,413 @@
+{
+  "summary": {
+    "total_skipped_tests": 3262,
+    "skipped_all_platforms": 476,
+    "tier1_affected_skips": 2499,
+    "tier1_suite_count": 33,
+    "tier2_only_suite_count": 0
+  },
+  "suites": {
+    "_webconsole_ak": {
+      "total_skipped": 20,
+      "skipped_all_platforms": 0,
+      "tier1_affected": 19,
+      "suite_always_tier2": false,
+      "skips_by_os": {
+        "linux": 18,
+        "win": 1
+      }
+    },
+    "_webconsole_lz": {
+      "total_skipped": 9,
+      "skipped_all_platforms": 2,
+      "tier1_affected": 7,
+      "suite_always_tier2": false,
+      "skips_by_os": {
+        "linux": 6,
+        "mac": 3,
+        "win": 2,
+        "android": 2
+      }
+    },
+    "_webconsole_network": {
+      "total_skipped": 1,
+      "skipped_all_platforms": 0,
+      "tier1_affected": 1,
+      "suite_always_tier2": false,
+      "skips_by_os": {
+        "linux": 1
+      }
+    },
+    "_webconsole_object_inspector": {
+      "total_skipped": 1,
+      "skipped_all_platforms": 0,
+      "tier1_affected": 1,
+      "suite_always_tier2": false,
+      "skips_by_os": {
+        "linux": 1
+      }
+    },
+    "_webconsole_warning_group": {
+      "total_skipped": 1,
+      "skipped_all_platforms": 1,
+      "tier1_affected": 1,
+      "suite_always_tier2": false,
+      "skips_by_os": {
+        "linux": 1,
+        "mac": 1,
+        "win": 1,
+        "android": 1
+      }
+    },
+    "cppunittest": {
+      "total_skipped": 4,
+      "skipped_all_platforms": 3,
+      "tier1_affected": 4,
+      "suite_always_tier2": false,
+      "skips_by_os": {
+        "linux": 3,
+        "mac": 4,
+        "win": 4,
+        "android": 4
+      }
+    },
+    "default-skipif": {
+      "total_skipped": 5,
+      "skipped_all_platforms": 1,
+      "tier1_affected": 4,
+      "suite_always_tier2": false,
+      "skips_by_os": {
+        "linux": 2,
+        "mac": 1,
+        "win": 3,
+        "android": 1
+      }
+    },
+    "edit-manifest-after": {
+      "total_skipped": 7,
+      "skipped_all_platforms": 2,
+      "tier1_affected": 7,
+      "suite_always_tier2": false,
+      "skips_by_os": {
+        "android": 3,
+        "win": 3,
+        "linux": 4,
+        "mac": 6,
+        "windows": 1
+      }
+    },
+    "edit-manifest-before": {
+      "total_skipped": 6,
+      "skipped_all_platforms": 0,
+      "tier1_affected": 6,
+      "suite_always_tier2": false,
+      "skips_by_os": {
+        "android": 1,
+        "linux": 4,
+        "mac": 4,
+        "win": 1
+      }
+    },
+    "filter-example": {
+      "total_skipped": 3,
+      "skipped_all_platforms": 0,
+      "tier1_affected": 3,
+      "suite_always_tier2": false,
+      "skips_by_os": {
+        "linux": 1,
+        "mac": 3,
+        "android": 1,
+        "win": 1
+      }
+    },
+    "invalid": {
+      "total_skipped": 2,
+      "skipped_all_platforms": 0,
+      "tier1_affected": 0,
+      "suite_always_tier2": false,
+      "skips_by_os": {}
+    },
+    "manifest": {
+      "total_skipped": 21,
+      "skipped_all_platforms": 6,
+      "tier1_affected": 21,
+      "suite_always_tier2": false,
+      "skips_by_os": {
+        "linux": 14,
+        "mac": 12,
+        "win": 11,
+        "android": 6
+      }
+    },
+    "mochitest-a11y": {
+      "total_skipped": 7,
+      "skipped_all_platforms": 0,
+      "tier1_affected": 7,
+      "suite_always_tier2": false,
+      "skips_by_os": {
+        "linux": 3,
+        "win": 2,
+        "mac": 5
+      }
+    },
+    "mochitest-browser-chrome": {
+      "total_skipped": 995,
+      "skipped_all_platforms": 188,
+      "tier1_affected": 909,
+      "suite_always_tier2": false,
+      "skips_by_os": {
+        "linux": 549,
+        "mac": 443,
+        "win": 482,
+        "android": 199
+      }
+    },
+    "mochitest-chrome": {
+      "total_skipped": 47,
+      "skipped_all_platforms": 11,
+      "tier1_affected": 39,
+      "suite_always_tier2": false,
+      "skips_by_os": {
+        "linux": 29,
+        "mac": 19,
+        "win": 19,
+        "android": 11
+      }
+    },
+    "mochitest-plain": {
+      "total_skipped": 1632,
+      "skipped_all_platforms": 194,
+      "tier1_affected": 1060,
+      "suite_always_tier2": false,
+      "skips_by_os": {
+        "mac": 321,
+        "win": 348,
+        "linux": 398,
+        "android": 779
+      }
+    },
+    "native_messaging": {
+      "total_skipped": 1,
+      "skipped_all_platforms": 1,
+      "tier1_affected": 1,
+      "suite_always_tier2": false,
+      "skips_by_os": {
+        "linux": 1,
+        "mac": 1,
+        "win": 1,
+        "android": 1
+      }
+    },
+    "non-idiomatic": {
+      "total_skipped": 5,
+      "skipped_all_platforms": 0,
+      "tier1_affected": 4,
+      "suite_always_tier2": false,
+      "skips_by_os": {
+        "linux": 4,
+        "mac": 2,
+        "android": 1,
+        "win": 1
+      }
+    },
+    "non-idiomatic-fix": {
+      "total_skipped": 5,
+      "skipped_all_platforms": 1,
+      "tier1_affected": 5,
+      "suite_always_tier2": false,
+      "skips_by_os": {
+        "linux": 5,
+        "android": 2,
+        "mac": 3,
+        "win": 2
+      }
+    },
+    "perftest": {
+      "total_skipped": 3,
+      "skipped_all_platforms": 3,
+      "tier1_affected": 3,
+      "suite_always_tier2": false,
+      "skips_by_os": {
+        "linux": 3,
+        "mac": 3,
+        "win": 3,
+        "android": 3
+      }
+    },
+    "python": {
+      "total_skipped": 4,
+      "skipped_all_platforms": 0,
+      "tier1_affected": 4,
+      "suite_always_tier2": false,
+      "skips_by_os": {
+        "mac": 1,
+        "win": 4
+      }
+    },
+    "remove-manifest-after1": {
+      "total_skipped": 3,
+      "skipped_all_platforms": 0,
+      "tier1_affected": 3,
+      "suite_always_tier2": false,
+      "skips_by_os": {
+        "mac": 3,
+        "win": 1
+      }
+    },
+    "remove-manifest-after2": {
+      "total_skipped": 4,
+      "skipped_all_platforms": 0,
+      "tier1_affected": 4,
+      "suite_always_tier2": false,
+      "skips_by_os": {
+        "linux": 3,
+        "mac": 3,
+        "win": 1
+      }
+    },
+    "remove-manifest-after3": {
+      "total_skipped": 4,
+      "skipped_all_platforms": 0,
+      "tier1_affected": 4,
+      "suite_always_tier2": false,
+      "skips_by_os": {
+        "linux": 3,
+        "mac": 3,
+        "win": 1
+      }
+    },
+    "remove-manifest-before": {
+      "total_skipped": 4,
+      "skipped_all_platforms": 0,
+      "tier1_affected": 4,
+      "suite_always_tier2": false,
+      "skips_by_os": {
+        "linux": 3,
+        "mac": 3,
+        "win": 1
+      }
+    },
+    "replace-tbd-after": {
+      "total_skipped": 4,
+      "skipped_all_platforms": 0,
+      "tier1_affected": 4,
+      "suite_always_tier2": false,
+      "skips_by_os": {
+        "linux": 2,
+        "android": 1,
+        "mac": 2,
+        "win": 1
+      }
+    },
+    "replace-tbd-before": {
+      "total_skipped": 4,
+      "skipped_all_platforms": 0,
+      "tier1_affected": 4,
+      "suite_always_tier2": false,
+      "skips_by_os": {
+        "android": 1,
+        "linux": 2,
+        "mac": 2,
+        "win": 1
+      }
+    },
+    "skip-if-explicit-or": {
+      "total_skipped": 2,
+      "skipped_all_platforms": 0,
+      "tier1_affected": 1,
+      "suite_always_tier2": false,
+      "skips_by_os": {
+        "linux": 1
+      }
+    },
+    "stubs": {
+      "total_skipped": 1,
+      "skipped_all_platforms": 1,
+      "tier1_affected": 1,
+      "suite_always_tier2": false,
+      "skips_by_os": {
+        "linux": 1,
+        "mac": 1,
+        "win": 1,
+        "android": 1
+      }
+    },
+    "unit-tests": {
+      "total_skipped": 8,
+      "skipped_all_platforms": 1,
+      "tier1_affected": 4,
+      "suite_always_tier2": false,
+      "skips_by_os": {
+        "linux": 2,
+        "mac": 2,
+        "win": 2,
+        "android": 1
+      }
+    },
+    "unsorted": {
+      "total_skipped": 6,
+      "skipped_all_platforms": 3,
+      "tier1_affected": 5,
+      "suite_always_tier2": false,
+      "skips_by_os": {
+        "win": 4,
+        "android": 3,
+        "linux": 4,
+        "mac": 3
+      }
+    },
+    "unsorted-fix": {
+      "total_skipped": 6,
+      "skipped_all_platforms": 3,
+      "tier1_affected": 5,
+      "suite_always_tier2": false,
+      "skips_by_os": {
+        "android": 3,
+        "win": 4,
+        "linux": 4,
+        "mac": 3
+      }
+    },
+    "xpcshell": {
+      "total_skipped": 437,
+      "skipped_all_platforms": 55,
+      "tier1_affected": 354,
+      "suite_always_tier2": false,
+      "skips_by_os": {
+        "win": 150,
+        "android": 256,
+        "linux": 85,
+        "mac": 94
+      }
+    }
+  },
+  "always_tier2_suites": [
+    "firefox-ui-functional",
+    "talos-bcv-profiling",
+    "talos-chrome-profiling",
+    "talos-damp-inspector-profiling",
+    "talos-damp-other-profiling",
+    "talos-damp-webconsole-profiling",
+    "talos-dromaeojs-profiling",
+    "talos-g1-profiling",
+    "talos-g3-profiling",
+    "talos-g4-profiling",
+    "talos-g5-profiling",
+    "talos-motionmark",
+    "talos-motionmark-profiling",
+    "talos-other-profiling",
+    "talos-perf-reftest-profiling",
+    "talos-perf-reftest-singletons-profiling",
+    "talos-realworld-webextensions-profiling",
+    "talos-sessionrestore-many-windows-profiling",
+    "talos-svgr-profiling",
+    "talos-tabswitch-profiling",
+    "talos-tp5o-profiling",
+    "talos-webgl-profiling",
+    "test-coverage",
+    "test-coverage-gpu",
+    "test-verify",
+    "test-verify-gpu",
+    "xpcshell-failures"
+  ]
+}

@@ -142,7 +142,7 @@
   <p>Mapping test suite coverage across Firefox CI worker pools and surfacing coverage gaps through static analysis of in-tree CI configuration.</p>
   <div class="stats-bar">
     <div class="stat">
-      <div class="number">135</div>
+      <div class="number">143</div>
       <div class="label">Test Suites</div>
     </div>
     <div class="stat">
@@ -171,8 +171,13 @@
     </div>
     <div class="card">
       <h3>Test-Level Skip Matrix</h3>
-      <p>3,398 individual tests with skip-if conditions, grouped by suite. Red dots show where tests are skipped. Filter by name or show only tests skipped on all platforms.</p>
+      <p>3,413 individual tests with skip-if conditions, grouped by suite. Shows skipped/total counts and percentages. Filter by name or show only tests skipped on all platforms.</p>
       <a href="test_skip_matrix.html" class="btn btn-red">Open Dashboard</a>
+    </div>
+    <div class="card">
+      <h3>Suite x Platform Tier Matrix</h3>
+      <p>143 suites across 64 platforms showing tier classification (T1 must-pass, T2 secondary, T3 experimental). Grouped by OS family with sticky headers. Includes variant tier overrides.</p>
+      <a href="tier_matrix.html" class="btn" style="background: #27AE60;">Open Dashboard</a>
     </div>
   </div>
 

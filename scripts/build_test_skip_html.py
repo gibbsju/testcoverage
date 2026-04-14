@@ -102,27 +102,35 @@ def main():
     print("Scanning manifest files for skip-if annotations...")
     all_toml = list(FIREFOX.rglob("*.toml"))
     manifests = []
+    test_manifests = []  # all manifests with test entries (for total counts)
     for f in all_toml:
         if "node_modules" in str(f) or ".git" in str(f):
             continue
         try:
             content = f.read_text(encoding="utf-8", errors="replace")
+            # Check if this looks like a test manifest (has [test_name] entries)
+            has_tests = any(
+                re.match(r'\["?[^"\]]+"?\]', line.strip())
+                for line in content.split("\n")
+                if not line.strip().startswith("[[")
+            )
+            if has_tests:
+                test_manifests.append(f)
             if "skip-if" in content:
                 manifests.append(f)
         except Exception:
             continue
 
     print(f"  Found {len(manifests)} manifests with skip-if")
+    print(f"  Found {len(test_manifests)} total test manifests")
 
     # Parse all skips: {rel_path::test_name -> {os -> [conditions]}}
     test_skips = defaultdict(lambda: defaultdict(list))
     all_tests_in_manifest = defaultdict(set)  # rel_path -> set of test names
 
-    for mf in manifests:
+    # First, count all tests across ALL test manifests (for total denominators)
+    for mf in test_manifests:
         rel = str(mf.relative_to(FIREFOX)).replace("\\", "/")
-        skips = extract_skip_conditions_toml(mf)
-
-        # Also extract all test names from the manifest
         try:
             content = mf.read_text(encoding="utf-8", errors="replace")
             for line in content.split("\n"):
@@ -131,6 +139,11 @@ def main():
                     all_tests_in_manifest[rel].add(m.group(1))
         except Exception:
             pass
+
+    # Then parse skip conditions from manifests that have them
+    for mf in manifests:
+        rel = str(mf.relative_to(FIREFOX)).replace("\\", "/")
+        skips = extract_skip_conditions_toml(mf)
 
         for test_name, condition in skips:
             targets = extract_os_from_condition(condition)
@@ -177,40 +190,53 @@ def main():
             key=lambda t: (-sum(1 for os in OS_LIST if os in t["skips"]), t["test"])
         )
 
+    # Count total tests per suite (all tests, not just skipped)
+    suite_totals = defaultdict(int)
+    for rel_path, test_names in all_tests_in_manifest.items():
+        suite = infer_suite_from_path(rel_path)
+        suite_totals[suite] += len(test_names)
+
     # Count stats
-    total_tests = sum(len(tests) for tests in manifest_groups.values())
+    total_with_skips = sum(len(tests) for tests in manifest_groups.values())
+    total_all_tests = sum(suite_totals.values())
     total_skipped_all = sum(
         1 for tests in manifest_groups.values()
         for t in tests if t["skipped_all"]
     )
 
-    print(f"  Total tests with skip-if: {total_tests}")
+    print(f"  Total tests across all suites: {total_all_tests}")
+    print(f"  Total tests with skip-if: {total_with_skips}")
     print(f"  Skipped on ALL platforms: {total_skipped_all}")
     print(f"  Suites: {len(manifest_groups)}")
 
     # Build HTML
-    html = build_html(manifest_groups, total_tests, total_skipped_all)
+    html = build_html(manifest_groups, total_with_skips, total_skipped_all, suite_totals, total_all_tests)
     out = BASE / "docs" / "test_skip_matrix.html"
     out.write_text(html, encoding="utf-8")
     print(f"\nHTML saved to: {out}")
 
 
-def build_html(manifest_groups, total_tests, total_skipped_all):
+def build_html(manifest_groups, total_with_skips, total_skipped_all, suite_totals, total_all_tests):
     suites_sorted = sorted(manifest_groups.keys())
 
     # Build suite nav
     suite_nav = []
     for suite in suites_sorted:
-        count = len(manifest_groups[suite])
+        skipped_count = len(manifest_groups[suite])
+        total_count = suite_totals.get(suite, skipped_count)
+        pct = (skipped_count / total_count * 100) if total_count > 0 else 0
         skip_all = sum(1 for t in manifest_groups[suite] if t["skipped_all"])
-        suite_nav.append(f'<a href="#suite-{suite}" class="suite-link">{suite} <span class="badge">{count}</span>'
-                        + (f' <span class="badge-red">{skip_all} all-skip</span>' if skip_all else '')
+        skip_all_pct = (skip_all / total_count * 100) if total_count > 0 else 0
+        suite_nav.append(f'<a href="#suite-{suite}" class="suite-link">{suite} <span class="badge">{skipped_count}/{total_count} ({pct:.0f}%)</span>'
+                        + (f' <span class="badge-red">{skip_all} all-skip ({skip_all_pct:.0f}%)</span>' if skip_all else '')
                         + '</a>')
 
     # Build table rows per suite
     suite_sections = []
     for suite in suites_sorted:
         tests = manifest_groups[suite]
+        total_count = suite_totals.get(suite, len(tests))
+        skip_pct = (len(tests) / total_count * 100) if total_count > 0 else 0
         skip_all_count = sum(1 for t in tests if t["skipped_all"])
 
         rows = []
@@ -250,8 +276,8 @@ def build_html(manifest_groups, total_tests, total_skipped_all):
         <div class="suite-section" id="suite-{suite}">
             <div class="suite-header">
                 {suite}
-                <span class="suite-count">{len(tests)} tests</span>
-                {'<span class="suite-danger">' + str(skip_all_count) + ' skipped everywhere</span>' if skip_all_count else ''}
+                <span class="suite-count">{len(tests)} skipped of {total_count} total ({skip_pct:.1f}%)</span>
+                {'<span class="suite-danger">' + str(skip_all_count) + ' skipped everywhere (' + f'{skip_all_count / total_count * 100:.1f}' + '%)' + '</span>' if skip_all_count else ''}
             </div>
             <table>
                 <thead>
@@ -492,7 +518,7 @@ tr.hidden {{ display: none; }}
     <h1>Firefox CI: Test-Level Skip Matrix</h1>
     <p class="subtitle">Red = skipped on that OS | Green = runs | Hover red dots for skip condition | Grouped by suite</p>
     <div class="stats">
-        <span class="stat">Tests with skips: <b>{total_tests}</b></span>
+        <span class="stat">Tests with skips: <b>{total_with_skips}</b> of <b>{total_all_tests}</b> total ({(total_with_skips / total_all_tests * 100) if total_all_tests else 0:.1f}%)</span>
         <span class="stat stat-danger">Skipped on ALL platforms: <b>{total_skipped_all}</b></span>
         <span class="stat">Suites: <b>{len(manifest_groups)}</b></span>
     </div>

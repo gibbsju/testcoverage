@@ -1,0 +1,129 @@
+{
+  "snapshot_date": "2026-04-15",
+  "description": "macOS functional test suites categorized by VM migration feasibility for Tart on Mac Minis (16GB RAM, 2 VMs per host = ~8GB each)",
+  "mac_tier1_platforms": [
+    "macosx1015-64-devedition-qr/opt",
+    "macosx1015-64-qr/debug",
+    "macosx1015-64-qr/opt",
+    "macosx1015-64-shippable-qr/opt",
+    "macosx1470-64-devedition/opt",
+    "macosx1470-64-shippable/opt",
+    "macosx1470-64/debug",
+    "macosx1470-64/opt"
+  ],
+  "summary": {
+    "total_functional_suites": 54,
+    "tier1_on_mac": 50,
+    "tier2_plus_on_mac": 4,
+    "high_confidence_vm_tier1": 22,
+    "high_confidence_vm_tier1_pct": 44.0,
+    "investigate_graphics_tier1": 23,
+    "investigate_graphics_tier1_pct": 46.0,
+    "combined_potential_vm_tier1": 45,
+    "combined_potential_vm_tier1_pct": 90.0,
+    "must_stay_bare_metal_tier1": 5,
+    "must_stay_bare_metal_tier1_pct": 10.0
+  },
+  "categories": {
+    "high_confidence_vm": {
+      "description": "Already virtual on Linux/Windows, default instance size, no GPU/video/heavy-CPU needs",
+      "tier1": [
+        "cppunittest",
+        "crashtest",
+        "crashtest-qr",
+        "gtest",
+        "jittest",
+        "jittest-all",
+        "marionette-integration",
+        "marionette-unittest",
+        "mochitest-a11y",
+        "mochitest-browser-a11y",
+        "mochitest-browser-chrome",
+        "mochitest-browser-chrome-failures",
+        "mochitest-browser-translations",
+        "mochitest-chrome",
+        "mochitest-devtools-chrome",
+        "mochitest-plain",
+        "mochitest-remote",
+        "telemetry-tests-client",
+        "web-platform-tests",
+        "web-platform-tests-backlog",
+        "web-platform-tests-crashtest",
+        "web-platform-tests-wdspec"
+      ],
+      "tier2_plus": [
+        "firefox-ui-functional"
+      ]
+    },
+    "investigate_graphics": {
+      "description": "Virtual on other platforms (likely SW rendering) but graphics-related. Need to verify macOS VM handles SW rendering correctly.",
+      "tier1": [
+        "jsreftest",
+        "mochitest-browser-media",
+        "mochitest-browser-screenshots",
+        "mochitest-chrome-gpu",
+        "mochitest-media",
+        "mochitest-plain-gpu",
+        "mochitest-webgl1-core",
+        "mochitest-webgl1-ext",
+        "mochitest-webgl2-core",
+        "mochitest-webgl2-ext",
+        "mochitest-webgpu",
+        "reftest",
+        "reftest-qr",
+        "web-platform-tests-canvas",
+        "web-platform-tests-eme",
+        "web-platform-tests-print-reftest",
+        "web-platform-tests-reftest",
+        "web-platform-tests-reftest-backlog",
+        "web-platform-tests-webcodecs",
+        "web-platform-tests-webgpu",
+        "web-platform-tests-webgpu-backlog",
+        "web-platform-tests-webgpu-backlog-long",
+        "web-platform-tests-webgpu-long"
+      ],
+      "tier2_plus": []
+    },
+    "too_heavy": {
+      "description": "High CPU or memory requirements that likely exceed 8GB VM capacity",
+      "tier1": [
+        "mochitest-valgrind",
+        "xpcshell"
+      ],
+      "tier2_plus": []
+    },
+    "needs_special_resources": {
+      "description": "Require loopback video, long runtimes (10800s), or explicitly disable software GL",
+      "tier1": [
+        "geckoview-junit"
+      ],
+      "tier2_plus": [
+        "test-coverage",
+        "test-verify"
+      ]
+    },
+    "low_priority": {
+      "description": "Could potentially run on VM but low priority for migration",
+      "tier1": [
+        "test-coverage-wpt",
+        "test-verify-wpt"
+      ],
+      "tier2_plus": [
+        "xpcshell-failures"
+      ]
+    }
+  },
+  "constraints": {
+    "hardware": "Mac Minis, 16GB RAM",
+    "vm_technology": "Tart",
+    "vms_per_host": 2,
+    "ram_per_vm": "~8GB",
+    "licensing_limit": "2 VMs per hardware host (macOS licensing)"
+  },
+  "methodology": {
+    "virtualization_signal": "Suites with virtualization: virtual (default) on Linux/Windows already proven to not need bare metal",
+    "gpu_classification": "Suites with GPU/WebGL/WebGPU/reftest/canvas/screenshots in name flagged for graphics investigation",
+    "resource_classification": "instance-size: highcpu or large flagged as too heavy, loopback-video or allow-software-gl-layers: false flagged as special",
+    "tier_source": "Three-layer resolution: variant overrides > kind YAML > handle_tier() defaults"
+  }
+}

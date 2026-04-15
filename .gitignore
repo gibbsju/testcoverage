@@ -7,5 +7,8 @@ dist/
 firefox/
 fxci-config/
 
+# Skills - managed in separate repo
+skills/
+
 # Claude internals
 .claude/

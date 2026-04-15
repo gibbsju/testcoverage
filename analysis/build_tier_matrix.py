@@ -224,6 +224,7 @@ def main():
     output = {
         "platforms": platforms,
         "platforms_by_os": {os_name: plats for os_name, plats in os_groups.items()},
+        "tier_1_platforms": TIER_1_PLATFORMS,
         "suites": suites,
         "matrix": matrix,
         "variant_overrides": variant_overrides,

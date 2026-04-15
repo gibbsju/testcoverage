@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>macOS VM Migration Candidates</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    background: #1a1a2e;
+    color: #ccc;
+    font-family: 'Consolas', 'Courier New', monospace;
+    font-size: 13px;
+}
+.top-bar {
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    background: #0d1525;
+    padding: 12px 20px;
+    border-bottom: 2px solid #333;
+}
+.top-bar h1 { color: white; font-size: 20px; margin-bottom: 4px; }
+.top-bar .subtitle { color: #888; font-size: 12px; margin-bottom: 10px; }
+.stats {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 8px;
+    font-size: 12px;
+    flex-wrap: wrap;
+}
+.stat { color: #aaa; }
+.stat b { color: white; }
+.stat-high b { color: #27AE60; }
+.stat-med b { color: #F39C12; }
+.stat-low b { color: #E74C3C; }
+.legend {
+    display: flex;
+    gap: 18px;
+    font-size: 12px;
+    margin-bottom: 8px;
+}
+.legend span { display: flex; align-items: center; gap: 5px; }
+.swatch { width: 14px; height: 14px; display: inline-block; border-radius: 2px; }
+.swatch-high { background: #27AE60; }
+.swatch-med { background: #F39C12; }
+.swatch-low { background: #E74C3C; }
+.swatch-perf { background: #555; }
+.nav-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+.nav-link {
+    color: #ccc;
+    text-decoration: none;
+    padding: 4px 12px;
+    border-radius: 4px;
+    background: #16213e;
+    font-size: 12px;
+    border-left: 3px solid;
+}
+.nav-link:hover { background: #2a3a5a; }
+.content {
+    padding: 16px 20px;
+    max-width: 1200px;
+}
+.section {
+    margin-bottom: 30px;
+}
+.section-header {
+    padding: 8px 12px;
+    margin-bottom: 0;
+    background: #0d1525;
+    border-radius: 4px 4px 0 0;
+    position: sticky;
+    top: 155px;
+    z-index: 50;
+}
+.section-header h2 { font-size: 16px; display: inline; margin-right: 12px; }
+.section-stats { color: #888; font-size: 12px; }
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+thead th {
+    position: sticky;
+    top: 190px;
+    z-index: 40;
+    background: #0d1525;
+    padding: 6px 8px;
+    font-size: 11px;
+    color: #aaa;
+    text-align: left;
+    border-bottom: 1px solid #444;
+}
+th.center { text-align: center; }
+td {
+    padding: 4px 8px;
+    border-bottom: 1px solid #1e2a4a;
+    font-size: 12px;
+}
+.suite-name { color: #ddd; white-space: nowrap; }
+.tier-1 { color: #27AE60; font-weight: bold; text-align: center; }
+.tier-2 { color: #F39C12; text-align: center; }
+.arch { color: #aaa; font-size: 11px; text-align: center; }
+.skip-warn { color: #F39C12; text-align: center; }
+.skip-ok { color: #888; text-align: center; }
+.reason { color: #888; font-size: 11px; }
+tr:nth-child(even) { background: #1a1a2e; }
+tr:nth-child(odd) { background: #16213e; }
+tr:hover { background: #2a3a5a !important; }
+.context-box {
+    margin-top: 30px;
+    padding: 16px;
+    background: #0d1525;
+    border-radius: 6px;
+    border: 1px solid #333;
+}
+.context-box h2 { color: white; font-size: 16px; margin-bottom: 10px; }
+.context-box p { color: #999; font-size: 12px; line-height: 1.6; margin-bottom: 8px; }
+.context-box ul { color: #999; font-size: 12px; line-height: 1.8; margin-left: 20px; }
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+    <h1>macOS VM Migration Candidates</h1>
+    <p class="subtitle">Which macOS functional test suites can move from bare metal to Tart VMs on Mac Minis (16GB, 2 VMs/host)?</p>
+    <div class="stats">
+        <span class="stat">All macOS suites: <b>111</b></span>
+        <span class="stat">Performance (bare metal): <b>66</b></span>
+        <span class="stat">Functional: <b>45</b></span>
+        <span class="stat stat-high">High likelihood VM: <b>19</b> (18 T1)</span>
+        <span class="stat stat-med">Medium (investigate): <b>22</b> (22 T1)</span>
+        <span class="stat stat-low">Low (likely bare metal): <b>4</b> (2 T1)</span>
+    </div>
+    <div class="legend">
+        <span><span class="swatch swatch-high"></span> High — ready to pilot on VM</span>
+        <span><span class="swatch swatch-med"></span> Medium — needs investigation</span>
+        <span><span class="swatch swatch-low"></span> Low — likely needs bare metal</span>
+        <span><span class="swatch swatch-perf"></span> Performance — excluded</span>
+    </div>
+    <div class="nav-bar">
+        <a href="#high" class="nav-link" style="border-color: #27AE60;">High (19)</a>
+        <a href="#medium" class="nav-link" style="border-color: #F39C12;">Medium (22)</a>
+        <a href="#low" class="nav-link" style="border-color: #E74C3C;">Low (4)</a>
+        <a href="#perf" class="nav-link" style="border-color: #555;">Performance (66)</a>
+        <a href="#context" class="nav-link" style="border-color: #4A90D9;">Context</a>
+    </div>
+</div>
+
+<div class="content">
+
+    <div class="section" id="high">
+        <div class="section-header" style="border-left: 4px solid #27AE60;">
+            <h2 style="color: #27AE60;">High Likelihood — Ready to Pilot</h2>
+            <span class="section-stats">19 suites (18 tier 1) — already virtual on Linux/Windows, no GPU/video/heavy resource needs</span>
+        </div>
+        <table>
+            <thead><tr>
+                <th>Suite</th><th class="center">Tier</th><th class="center">Arch</th>
+                <th class="center">Skips</th><th class="center">All-Plat</th><th>Reason</th>
+            </tr></thead>
+            <tbody><tr><td class="suite-name">firefox-ui-functional</td><td class="tier-2">T2+</td><td class="arch">Apple Silicon + Intel</td><td class="">0</td><td>0</td><td class="reason">Virtual on Linux/Windows, default resources, no GPU/video needs</td></tr>
+<tr><td class="suite-name">cppunittest</td><td class="tier-1">T1</td><td class="arch">Apple Silicon + Intel</td><td class="skip-ok">4</td><td>3</td><td class="reason">Virtual on Linux/Windows, default resources, no GPU/video needs</td></tr>
+<tr><td class="suite-name">crashtest</td><td class="tier-1">T1</td><td class="arch">Apple Silicon + Intel</td><td class="">0</td><td>0</td><td class="reason">Virtual on Linux/Windows, default resources, no GPU/video needs</td></tr>
+<tr><td class="suite-name">jittest</td><td class="tier-1">T1</td><td class="arch">Apple Silicon + Intel</td><td class="">0</td><td>0</td><td class="reason">Virtual on Linux/Windows, default resources, no GPU/video needs</td></tr>
+<tr><td class="suite-name">marionette-integration</td><td class="tier-1">T1</td><td class="arch">Apple Silicon + Intel</td><td class="">0</td><td>0</td><td class="reason">Virtual on Linux/Windows, default resources, no GPU/video needs</td></tr>
+<tr><td class="suite-name">marionette-unittest</td><td class="tier-1">T1</td><td class="arch">Apple Silicon + Intel</td><td class="">0</td><td>0</td><td class="reason">Virtual on Linux/Windows, default resources, no GPU/video needs</td></tr>
+<tr><td class="suite-name">mochitest-a11y</td><td class="tier-1">T1</td><td class="arch">Apple Silicon + Intel</td><td class="skip-ok">7</td><td>0</td><td class="reason">Virtual on Linux/Windows, default resources, no GPU/video needs</td></tr>
+<tr><td class="suite-name">mochitest-browser-a11y</td><td class="tier-1">T1</td><td class="arch">Apple Silicon + Intel</td><td class="">0</td><td>0</td><td class="reason">Virtual on Linux/Windows, default resources, no GPU/video needs</td></tr>
+<tr><td class="suite-name">mochitest-browser-chrome</td><td class="tier-1">T1</td><td class="arch">Apple Silicon + Intel</td><td class="skip-warn">995</td><td>188</td><td class="reason">Virtual on Linux/Windows, default resources, no GPU/video needs</td></tr>
+<tr><td class="suite-name">mochitest-browser-translations</td><td class="tier-1">T1</td><td class="arch">Apple Silicon + Intel</td><td class="">0</td><td>0</td><td class="reason">Virtual on Linux/Windows, default resources, no GPU/video needs</td></tr>
+<tr><td class="suite-name">mochitest-chrome</td><td class="tier-1">T1</td><td class="arch">Apple Silicon + Intel</td><td class="skip-ok">47</td><td>11</td><td class="reason">Virtual on Linux/Windows, default resources, no GPU/video needs</td></tr>
+<tr><td class="suite-name">mochitest-devtools-chrome</td><td class="tier-1">T1</td><td class="arch">Apple Silicon + Intel</td><td class="">0</td><td>0</td><td class="reason">Virtual on Linux/Windows, default resources, no GPU/video needs</td></tr>
+<tr><td class="suite-name">mochitest-plain</td><td class="tier-1">T1</td><td class="arch">Apple Silicon + Intel</td><td class="skip-warn">1632</td><td>194</td><td class="reason">Virtual on Linux/Windows, default resources, no GPU/video needs</td></tr>
+<tr><td class="suite-name">mochitest-remote</td><td class="tier-1">T1</td><td class="arch">Apple Silicon + Intel</td><td class="">0</td><td>0</td><td class="reason">Virtual on Linux/Windows, default resources, no GPU/video needs</td></tr>
+<tr><td class="suite-name">test-verify-wpt</td><td class="tier-1">T1</td><td class="arch">Apple Silicon + Intel</td><td class="">0</td><td>0</td><td class="reason">Virtual on Linux/Windows, default resources, no GPU/video needs</td></tr>
+<tr><td class="suite-name">web-platform-tests</td><td class="tier-1">T1</td><td class="arch">Apple Silicon + Intel</td><td class="">0</td><td>0</td><td class="reason">Virtual on Linux/Windows, default resources, no GPU/video needs</td></tr>
+<tr><td class="suite-name">web-platform-tests-backlog</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Virtual on Linux/Windows, default resources, no GPU/video needs</td></tr>
+<tr><td class="suite-name">web-platform-tests-crashtest</td><td class="tier-1">T1</td><td class="arch">Apple Silicon + Intel</td><td class="">0</td><td>0</td><td class="reason">Virtual on Linux/Windows, default resources, no GPU/video needs</td></tr>
+<tr><td class="suite-name">web-platform-tests-wdspec</td><td class="tier-1">T1</td><td class="arch">Apple Silicon + Intel</td><td class="">0</td><td>0</td><td class="reason">Virtual on Linux/Windows, default resources, no GPU/video needs</td></tr></tbody>
+        </table>
+    </div>
+
+    <div class="section" id="medium">
+        <div class="section-header" style="border-left: 4px solid #F39C12;">
+            <h2 style="color: #F39C12;">Medium Likelihood — Needs Investigation</h2>
+            <span class="section-stats">22 suites (22 tier 1) — virtual on other platforms but has graphics/media/video dependencies to verify</span>
+        </div>
+        <table>
+            <thead><tr>
+                <th>Suite</th><th class="center">Tier</th><th class="center">Arch</th>
+                <th class="center">Skips</th><th class="center">All-Plat</th><th>Reason</th>
+            </tr></thead>
+            <tbody><tr><td class="suite-name">jsreftest</td><td class="tier-1">T1</td><td class="arch">Apple Silicon + Intel</td><td class="">0</td><td>0</td><td class="reason">Graphics/rendering comparison</td></tr>
+<tr><td class="suite-name">mochitest-browser-media</td><td class="tier-1">T1</td><td class="arch">Apple Silicon + Intel</td><td class="">0</td><td>0</td><td class="reason">Media playback/encoding</td></tr>
+<tr><td class="suite-name">mochitest-chrome-gpu</td><td class="tier-1">T1</td><td class="arch">Apple Silicon + Intel</td><td class="">0</td><td>0</td><td class="reason">GPU-dependent (WebGL/WebGPU)</td></tr>
+<tr><td class="suite-name">mochitest-media</td><td class="tier-1">T1</td><td class="arch">Apple Silicon + Intel</td><td class="">0</td><td>0</td><td class="reason">Media playback/encoding</td></tr>
+<tr><td class="suite-name">mochitest-plain-gpu</td><td class="tier-1">T1</td><td class="arch">Apple Silicon + Intel</td><td class="">0</td><td>0</td><td class="reason">GPU-dependent (WebGL/WebGPU)</td></tr>
+<tr><td class="suite-name">mochitest-webgl1-core</td><td class="tier-1">T1</td><td class="arch">Apple Silicon + Intel</td><td class="">0</td><td>0</td><td class="reason">GPU-dependent (WebGL/WebGPU)</td></tr>
+<tr><td class="suite-name">mochitest-webgl1-ext</td><td class="tier-1">T1</td><td class="arch">Apple Silicon + Intel</td><td class="">0</td><td>0</td><td class="reason">GPU-dependent (WebGL/WebGPU)</td></tr>
+<tr><td class="suite-name">mochitest-webgl2-core</td><td class="tier-1">T1</td><td class="arch">Apple Silicon + Intel</td><td class="">0</td><td>0</td><td class="reason">GPU-dependent (WebGL/WebGPU)</td></tr>
+<tr><td class="suite-name">mochitest-webgl2-ext</td><td class="tier-1">T1</td><td class="arch">Apple Silicon + Intel</td><td class="">0</td><td>0</td><td class="reason">GPU-dependent (WebGL/WebGPU)</td></tr>
+<tr><td class="suite-name">mochitest-webgpu</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">GPU-dependent (WebGL/WebGPU)</td></tr>
+<tr><td class="suite-name">reftest</td><td class="tier-1">T1</td><td class="arch">Apple Silicon + Intel</td><td class="">0</td><td>0</td><td class="reason">Graphics/rendering comparison</td></tr>
+<tr><td class="suite-name">telemetry-tests-client</td><td class="tier-1">T1</td><td class="arch">Apple Silicon + Intel</td><td class="">0</td><td>0</td><td class="reason">Media playback/encoding</td></tr>
+<tr><td class="suite-name">web-platform-tests-canvas</td><td class="tier-1">T1</td><td class="arch">Apple Silicon + Intel</td><td class="">0</td><td>0</td><td class="reason">Graphics/rendering comparison</td></tr>
+<tr><td class="suite-name">web-platform-tests-eme</td><td class="tier-1">T1</td><td class="arch">Apple Silicon + Intel</td><td class="">0</td><td>0</td><td class="reason">Media playback/encoding</td></tr>
+<tr><td class="suite-name">web-platform-tests-print-reftest</td><td class="tier-1">T1</td><td class="arch">Apple Silicon + Intel</td><td class="">0</td><td>0</td><td class="reason">Graphics/rendering comparison</td></tr>
+<tr><td class="suite-name">web-platform-tests-reftest</td><td class="tier-1">T1</td><td class="arch">Apple Silicon + Intel</td><td class="">0</td><td>0</td><td class="reason">Graphics/rendering comparison</td></tr>
+<tr><td class="suite-name">web-platform-tests-reftest-backlog</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Graphics/rendering comparison</td></tr>
+<tr><td class="suite-name">web-platform-tests-webcodecs</td><td class="tier-1">T1</td><td class="arch">Apple Silicon + Intel</td><td class="">0</td><td>0</td><td class="reason">Media playback/encoding</td></tr>
+<tr><td class="suite-name">web-platform-tests-webgpu</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">GPU-dependent (WebGL/WebGPU)</td></tr>
+<tr><td class="suite-name">web-platform-tests-webgpu-backlog</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">GPU-dependent (WebGL/WebGPU)</td></tr>
+<tr><td class="suite-name">web-platform-tests-webgpu-backlog-long</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">GPU-dependent (WebGL/WebGPU)</td></tr>
+<tr><td class="suite-name">web-platform-tests-webgpu-long</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">GPU-dependent (WebGL/WebGPU)</td></tr></tbody>
+        </table>
+    </div>
+
+    <div class="section" id="low">
+        <div class="section-header" style="border-left: 4px solid #E74C3C;">
+            <h2 style="color: #E74C3C;">Low Likelihood — Likely Needs Bare Metal</h2>
+            <span class="section-stats">4 suites (2 tier 1) — heavy CPU/memory needs or requires hardware GL/video</span>
+        </div>
+        <table>
+            <thead><tr>
+                <th>Suite</th><th class="center">Tier</th><th class="center">Arch</th>
+                <th class="center">Skips</th><th class="center">All-Plat</th><th>Reason</th>
+            </tr></thead>
+            <tbody><tr><td class="suite-name">test-verify</td><td class="tier-2">T2+</td><td class="arch">Apple Silicon + Intel</td><td class="">0</td><td>0</td><td class="reason">Requires loopback video + hardware GL</td></tr>
+<tr><td class="suite-name">test-verify-gpu</td><td class="tier-2">T2+</td><td class="arch">Apple Silicon + Intel</td><td class="">0</td><td>0</td><td class="reason">Requires loopback video + hardware GL</td></tr>
+<tr><td class="suite-name">gtest</td><td class="tier-1">T1</td><td class="arch">Apple Silicon + Intel</td><td class="">0</td><td>0</td><td class="reason">Heavy resources (instance-size: {'by-test-platform': {'linux.*': 'large-noscratch', 'windows.*-asan.*': 'large', 'default': 'default'}})</td></tr>
+<tr><td class="suite-name">xpcshell</td><td class="tier-1">T1</td><td class="arch">Apple Silicon + Intel</td><td class="skip-warn">437</td><td>55</td><td class="reason">Heavy resources (instance-size: {'by-variant': {'conditioned_profile': {'by-test-platform': {'linux.*': 'large-legacy', 'default': 'large'}}, 'default': 'highcpu'}})</td></tr></tbody>
+        </table>
+    </div>
+
+    <div class="section" id="perf">
+        <div class="section-header" style="border-left: 4px solid #555;">
+            <h2 style="color: #888;">Performance Suites — Bare Metal Required</h2>
+            <span class="section-stats">66 suites — talos, browsertime, awsy (excluded from VM analysis)</span>
+        </div>
+        <table>
+            <thead><tr>
+                <th>Suite</th><th class="center">Tier</th><th class="center">Arch</th>
+                <th class="center">Skips</th><th class="center">All-Plat</th><th>Reason</th>
+            </tr></thead>
+            <tbody><tr><td class="suite-name">talos-bcv-profiling</td><td class="tier-2">T2+</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">talos-chrome-profiling</td><td class="tier-2">T2+</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">talos-dromaeojs-profiling</td><td class="tier-2">T2+</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">talos-g1-profiling</td><td class="tier-2">T2+</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">talos-g3-profiling</td><td class="tier-2">T2+</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">talos-g4-profiling</td><td class="tier-2">T2+</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">talos-g5-profiling</td><td class="tier-2">T2+</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">talos-motionmark-profiling</td><td class="tier-2">T2+</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">talos-other-profiling</td><td class="tier-2">T2+</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">talos-perf-reftest-profiling</td><td class="tier-2">T2+</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">talos-perf-reftest-singletons-profiling</td><td class="tier-2">T2+</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">talos-realworld-webextensions-profiling</td><td class="tier-2">T2+</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">talos-sessionrestore-many-windows-profiling</td><td class="tier-2">T2+</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">talos-svgr-profiling</td><td class="tier-2">T2+</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">talos-tabswitch-profiling</td><td class="tier-2">T2+</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">talos-tp5o-profiling</td><td class="tier-2">T2+</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">talos-webgl-profiling</td><td class="tier-2">T2+</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">awsy</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">awsy-base</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">awsy-base-dmd</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">awsy-dmd</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">awsy-tp6</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">browsertime-benchmark</td><td class="tier-1">T1</td><td class="arch">Apple Silicon + Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">browsertime-benchmark-wasm</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">browsertime-custom</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">browsertime-first-install</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">browsertime-indexeddb</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">browsertime-network-bench</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">browsertime-pageload-benchmark</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">browsertime-regression-tests</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">browsertime-responsiveness</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">browsertime-speculative</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">browsertime-throttled</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">browsertime-tp6</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">browsertime-tp6-bytecode</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">browsertime-tp6-essential</td><td class="tier-1">T1</td><td class="arch">Apple Silicon + Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">browsertime-tp6-live</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">browsertime-tp6-live-sheriffed</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">browsertime-tp6-profiling</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">browsertime-tp6-webextensions</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">browsertime-tp7</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">browsertime-trr-performance</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">browsertime-upload</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">browsertime-video-playback-latency</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">browsertime-webcodecs</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">browsertime-youtube-playback</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">browsertime-youtube-playback-power</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">talos-bcv</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">talos-chrome</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">talos-damp-inspector</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">talos-damp-other</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">talos-damp-webconsole</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">talos-dromaeojs</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">talos-g1</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">talos-g4</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">talos-g5</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">talos-other</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">talos-pdfpaint</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">talos-perf-reftest</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">talos-perf-reftest-singletons</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">talos-realworld-webextensions</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">talos-sessionrestore-many-windows</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">talos-svgr</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">talos-tabswitch</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">talos-tp5o</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr>
+<tr><td class="suite-name">talos-webgl</td><td class="tier-1">T1</td><td class="arch">Intel</td><td class="">0</td><td>0</td><td class="reason">Performance suite — bare metal required</td></tr></tbody>
+        </table>
+    </div>
+
+    <div class="context-box" id="context">
+        <h2>Context and Methodology</h2>
+        <p><b>Target setup:</b> Tart VMs on Mac Minis (16GB RAM, 2 VMs per host = ~8GB/VM, macOS licensing limit).</p>
+        <p><b>Classification approach:</b></p>
+        <ul>
+            <li><b>High:</b> Suite runs as <code>virtualization: virtual</code> on Linux/Windows (default), uses default instance size, no GPU/video/heavy-CPU indicators in name or config.</li>
+            <li><b>Medium:</b> Suite is virtual on other platforms but has graphics (reftest, WebGL, WebGPU, canvas, screenshots), media (video codecs, encrypted media), or loopback video dependencies that need verification on macOS VMs.</li>
+            <li><b>Low:</b> Suite explicitly requires <code>highcpu</code> or <code>large</code> instance sizes, or needs both loopback video and hardware GL — likely exceeds 8GB VM capacity.</li>
+            <li><b>Performance:</b> All talos, browsertime, and awsy suites — require bare metal for stable, reproducible performance numbers.</li>
+        </ul>
+        <p><b>Key finding:</b> macOS CI config has no virtualization branching — all tests go to physical Mac pools regardless. The <code>virtualization</code> field only affects Windows worker selection. This analysis uses the Linux/Windows virtual status as a proxy for "doesn't need bare metal."</p>
+        <p><b>Architecture note:</b> Both Intel (Mac Mini) and Apple Silicon (M4 Mac Mini) hardware is in use. 115 tests only have coverage on Intel, 201 only on Apple Silicon. Neither architecture can be fully dropped without coverage loss.</p>
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -104,7 +104,7 @@ body {
     left: 0;
     right: 0;
     background: #0d1525;
-    border-bottom: 2px solid #444;
+    border-bottom: none;
     padding: 6px 20px;
 }
 .sticky-banner h3 { font-size: 14px; display: inline; margin-right: 10px; }
@@ -119,6 +119,7 @@ body {
     padding: 0 20px;
     border-bottom: 1px solid #444;
     overflow: hidden;
+    margin-top: 0;
 }
 .sticky-cols table { width: 100%; border-collapse: collapse; table-layout: fixed; }
 .sticky-cols th {
@@ -353,7 +354,7 @@ function applyFilters() {
                         lastSection = active;
                     }
                     cols.style.display = 'block';
-                    cols.style.top = (topBarBottom + banner.offsetHeight) + 'px';
+                    cols.style.top = (topBarBottom + banner.offsetHeight - 1) + 'px';
                     // Match table width
                     const contentTable = active.querySelector('table');
                     cols.querySelector('table').style.maxWidth = contentTable.offsetWidth + 'px';

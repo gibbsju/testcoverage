@@ -46,13 +46,15 @@
     position: relative;
   }
   table {
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     white-space: nowrap;
   }
   th, td {
     padding: 3px 6px;
     text-align: center;
-    border: 1px solid #2a2a4a;
+    border-right: 1px solid #2a2a4a;
+    border-bottom: 1px solid #2a2a4a;
   }
   th {
     background: #16213e;
@@ -63,6 +65,7 @@
     top: 0;
     z-index: 30;
     background: #0d1525;
+    border-bottom: 1px solid #2a2a4a;
   }
   /* Worker-type name row - sticks just below the OS row */
   tr.wt-row th {

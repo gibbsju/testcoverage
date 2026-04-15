@@ -1,6 +1,9 @@
 """
 Build an HTML page showing macOS functional test suites categorized by
 VM migration feasibility for Tart on Mac Minis.
+
+Categories are validated against actual try push results on
+VirtualMac2,1 (8GB RAM, 4 cores — matching target spec).
 """
 
 import json
@@ -28,6 +31,53 @@ WORKER_MAP = {
     "macosx1500-aarch64": {"worker": "t-osx-1500-m4", "arch": "Apple Silicon", "os_ver": "15.00"},
 }
 
+# --- Try push results (VirtualMac2,1 — 8GB RAM, 4 cores) ---
+# These override the config-based classification with real-world data.
+
+TRY_PUSH = {
+    # VERIFIED — passed on VM
+    "cppunittest":                  ("verified",  "Passed opt + debug on VM"),
+    "marionette-integration":       ("verified",  "Passed on VM"),
+    "web-platform-tests-crashtest": ("verified",  "Passed on VM"),
+    "mochitest-plain-gpu":          ("verified",  "Passed on VM (GPU works in Tart)"),
+    "mochitest-webgl1-ext":         ("verified",  "Passed on VM (WebGL extensions work)"),
+    "mochitest-webgl2-ext":         ("verified",  "Passed 3/4 chunks on VM (ext-1 fails)"),
+    "telemetry-tests-client":       ("verified",  "Passed on VM"),
+    "web-platform-tests-eme":       ("verified",  "Passed on VM (encrypted media works)"),
+    "web-platform-tests-print-reftest": ("verified", "Passed on VM (print rendering works)"),
+
+    # FIXABLE — partially working, known path to fix
+    "jittest":                      ("fixable",   "debug passes, opt fails due to x86_64 libnss3.dylib packaging bug (not VM-specific)"),
+    "web-platform-tests":           ("fixable",   "~7/13 chunks pass; some COEP/touch failures + timeouts need annotation"),
+    "web-platform-tests-wdspec":    ("fixable",   "7/9 variants pass; wdspec-3/-5 fail on window focus (VMs don't focus background windows)"),
+    "firefox-ui-functional":        ("fixable",   "SafeBrowsing file list mismatch — test expectation update, not a VM issue"),
+    "mochitest-plain":              ("fixable",   "Timeout cascade — tests hit 300s limit on slower VM; fixable with timeout tuning/chunk sizing"),
+    "mochitest-chrome":             ("fixable",   "Same timeout cascade as mochitest-plain"),
+    "mochitest-devtools-chrome":    ("fixable",   "Same timeout cascade"),
+    "mochitest-a11y":               ("fixable",   "Same timeout cascade"),
+    "marionette-unittest":          ("fixable",   "Window focus test fails — skip focus-dependent variants on VM"),
+
+    # BLOCKED — real VM blockers, need investigation
+    "crashtest":                    ("blocked",   "Application hang — Firefox starts, Marionette connects, then nothing for 1000s (macOS VM-specific)"),
+    "mochitest-browser-chrome":     ("blocked",   "Application hang — browser-chrome harness never starts executing tests"),
+    "mochitest-browser-a11y":       ("blocked",   "Same application hang"),
+    "mochitest-browser-translations": ("blocked", "Same application hang"),
+    "mochitest-browser-media":      ("blocked",   "Same application hang (browser-chrome pattern)"),
+    "mochitest-remote":             ("blocked",   "Unclassified failure — needs investigation"),
+    "reftest":                      ("blocked",   "Application hang — same as crashtest (reftest harness hang on macOS VMs)"),
+    "jsreftest":                    ("blocked",   "Same reftest harness hang"),
+    "mochitest-webgl1-core":        ("blocked",   "WebGL core tests fail (but extension tests pass)"),
+    "mochitest-webgl2-core":        ("blocked",   "Same — core fails, extensions pass"),
+    "mochitest-chrome-gpu":         ("blocked",   "Timeout cascade"),
+    "web-platform-tests-canvas":    ("blocked",   "Canvas rendering failures"),
+    "web-platform-tests-reftest":   ("blocked",   "Rendering failures"),
+    "web-platform-tests-webcodecs": ("blocked",   "Media codec failures"),
+
+    # CONFIRMED LOW — try push validates bare metal classification
+    "gtest":                        ("confirmed-low", "SIGSEGV crash during WebRTC/SRTP tests after 13,199 tests"),
+    "xpcshell":                     ("confirmed-low", "16 crash dumps; crash-recovery tests + enterprise CA config differ in VM"),
+}
+
 
 def get_mac_platforms():
     tp = yaml.safe_load((TC / "test_configs/test-platforms.yml").read_text(encoding="utf-8"))
@@ -44,7 +94,6 @@ def expand_test_sets(set_names):
 
 
 def get_suite_properties():
-    """Get virtualization, instance-size, etc. from kind YAMLs."""
     props = {}
     kind_dir = TC / "kinds" / "test"
     for yml_file in kind_dir.glob("*.yml"):
@@ -71,87 +120,51 @@ def get_suite_properties():
 
 
 def classify_suite(name, props):
-    """Classify a suite into high/medium/low VM likelihood."""
-    p = props.get(name, {})
-    virt = p.get("virtualization", "virtual")
-    inst = p.get("instance_size", "default")
-    video = p.get("loopback_video", False)
-    sw_gl = p.get("allow_sw_gl", True)
-    mrt = p.get("max_run_time", 3600)
+    """Classify using try push results first, then fall back to config analysis."""
 
-    # Performance suites — not candidates
+    # Try push override
+    if name in TRY_PUSH:
+        status, reason = TRY_PUSH[name]
+        return status, reason
+
+    # Performance suites
     if any(name.startswith(pf) for pf in PERF_PREFIXES):
         return "perf", "Performance suite — bare metal required"
 
-    # Explicit hardware virtualization
+    p = props.get(name, {})
+    virt = p.get("virtualization", "virtual")
     if virt == "hardware":
         return "perf", "Explicit hardware virtualization"
 
-    reasons = []
+    inst = p.get("instance_size", "default")
+    video = p.get("loopback_video", False)
+    sw_gl = p.get("allow_sw_gl", True)
 
-    # Check for GPU/graphics indicators
-    gpu_keywords = ["gpu", "webgl", "webgpu"]
-    graphics_keywords = ["reftest", "canvas", "screenshot"]
-    media_keywords = ["media", "webcodecs", "eme"]
-
-    has_gpu = any(k in name.lower() for k in gpu_keywords)
-    has_graphics = any(k in name.lower() for k in graphics_keywords)
-    has_media = any(k in name.lower() for k in media_keywords)
-
-    # Check resource heaviness
     is_heavy = False
     if isinstance(inst, str) and ("large" in inst.lower() or "high" in inst.lower()):
         is_heavy = True
     if isinstance(inst, dict):
-        # keyed-by — check for highcpu/large in values
         for v in str(inst).lower().split():
             if "highcpu" in v or "large" in v:
                 is_heavy = True
 
-    needs_video = video
-    needs_hw_gl = (sw_gl == False)
-    long_runtime = isinstance(mrt, int) and mrt > 7200
-
-    # Classification logic
     if is_heavy:
-        reasons.append(f"Heavy resources (instance-size: {inst})")
-        if needs_video:
-            reasons.append("Requires loopback video")
-        return "low", "; ".join(reasons)
+        return "not-tested", f"Heavy resources (instance-size: {inst}) — not in try push"
+    if video and sw_gl == False:
+        return "not-tested", "Requires loopback video + hardware GL — not in try push"
 
-    if needs_video and needs_hw_gl:
-        reasons.append("Requires loopback video + hardware GL")
-        return "low", "; ".join(reasons)
+    gpu_keywords = ["gpu", "webgl", "webgpu"]
+    graphics_keywords = ["reftest", "canvas", "screenshot"]
+    media_keywords = ["media", "webcodecs", "eme"]
 
-    if has_gpu:
-        reasons.append("GPU-dependent (WebGL/WebGPU)")
-        if needs_hw_gl:
-            reasons.append("Disables software GL")
-        return "medium", "; ".join(reasons)
+    if any(k in name.lower() for k in gpu_keywords + graphics_keywords + media_keywords):
+        return "not-tested", "Graphics/media suite — not in try push"
 
-    if has_graphics:
-        reasons.append("Graphics/rendering comparison")
-        return "medium", "; ".join(reasons)
-
-    if has_media:
-        reasons.append("Media playback/encoding")
-        return "medium", "; ".join(reasons)
-
-    if needs_video:
-        reasons.append("Requires loopback video")
-        return "medium", "; ".join(reasons)
-
-    if long_runtime:
-        reasons.append(f"Long runtime ({mrt}s)")
-        return "medium", "; ".join(reasons)
-
-    # Default: virtual on other platforms, no flags
-    reasons.append("Virtual on Linux/Windows, default resources, no GPU/video needs")
-    return "high", "; ".join(reasons)
+    return "not-tested", "Not in try push — config suggests virtual-capable"
 
 
 def main():
-    print("Building macOS VM candidates HTML...")
+    print("Building macOS VM candidates HTML (with try push validation)...")
 
     tier_data = json.loads((ANALYSIS / "tier_matrix.json").read_text(encoding="utf-8"))
     skip_data = json.loads((ANALYSIS / "tier_skip_crossref.json").read_text(encoding="utf-8"))
@@ -162,26 +175,19 @@ def main():
     mac_platforms = get_mac_platforms()
     suite_props = get_suite_properties()
 
-    # Collect all functional suites that run on macOS
     mac_suites = set()
     for plat_name, plat_def in mac_platforms.items():
         test_set_names = plat_def.get("test-sets", [])
         mac_suites.update(expand_test_sets(test_set_names))
 
-    # Classify each suite
     classified = []
     for suite in sorted(mac_suites):
         likelihood, reason = classify_suite(suite, suite_props)
-
-        # Tier info
         is_t1 = any(matrix.get(suite, {}).get(p) == 1 for p in mac_t1_plats)
-
-        # Skip info
         skip_info = skip_data.get("suites", {}).get(suite, {})
         skipped = skip_info.get("total_skipped", 0)
         skipped_all = skip_info.get("skipped_all_platforms", 0)
 
-        # Which platforms does it actually run on?
         runs_on = []
         for plat_name, plat_def in mac_platforms.items():
             plat_suites = expand_test_sets(plat_def.get("test-sets", []))
@@ -191,10 +197,7 @@ def main():
                     if plat_name.startswith(base):
                         hw = info
                         break
-                runs_on.append({
-                    "platform": plat_name,
-                    "arch": hw["arch"] if hw else "?",
-                })
+                runs_on.append({"platform": plat_name, "arch": hw["arch"] if hw else "?"})
 
         archs = set(r["arch"] for r in runs_on)
         arch_str = " + ".join(sorted(archs)) if archs else "?"
@@ -210,30 +213,29 @@ def main():
             "platform_count": len(runs_on),
         })
 
-    # Build HTML
     html = build_html(classified)
     out = BASE / "docs" / "mac_vm_candidates.html"
     out.write_text(html, encoding="utf-8")
     print(f"  HTML saved to: {out}")
 
-    # Stats
-    high = [c for c in classified if c["likelihood"] == "high"]
-    med = [c for c in classified if c["likelihood"] == "medium"]
-    low = [c for c in classified if c["likelihood"] == "low"]
-    perf = [c for c in classified if c["likelihood"] == "perf"]
-    print(f"  High: {len(high)}, Medium: {len(med)}, Low: {len(low)}, Perf (excluded): {len(perf)}")
+    for cat in ["verified", "fixable", "blocked", "confirmed-low", "not-tested", "perf"]:
+        items = [c for c in classified if c["likelihood"] == cat]
+        if items:
+            print(f"  {cat}: {len(items)}")
 
 
 def build_html(classified):
-    high = [c for c in classified if c["likelihood"] == "high"]
-    med = [c for c in classified if c["likelihood"] == "medium"]
-    low = [c for c in classified if c["likelihood"] == "low"]
+    verified = [c for c in classified if c["likelihood"] == "verified"]
+    fixable = [c for c in classified if c["likelihood"] == "fixable"]
+    blocked = [c for c in classified if c["likelihood"] == "blocked"]
+    confirmed_low = [c for c in classified if c["likelihood"] == "confirmed-low"]
+    not_tested = [c for c in classified if c["likelihood"] == "not-tested"]
     perf = [c for c in classified if c["likelihood"] == "perf"]
 
-    total_functional = len(high) + len(med) + len(low)
-    high_t1 = sum(1 for c in high if c["tier"] == 1)
-    med_t1 = sum(1 for c in med if c["tier"] == 1)
-    low_t1 = sum(1 for c in low if c["tier"] == 1)
+    total_functional = len(verified) + len(fixable) + len(blocked) + len(confirmed_low) + len(not_tested)
+    verified_t1 = sum(1 for c in verified if c["tier"] == 1)
+    fixable_t1 = sum(1 for c in fixable if c["tier"] == 1)
+    blocked_t1 = sum(1 for c in blocked if c["tier"] == 1)
 
     def make_rows(items):
         rows = []
@@ -257,7 +259,7 @@ def build_html(classified):
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>macOS VM Migration Candidates</title>
+<title>macOS VM Migration Candidates (Try Push Validated)</title>
 <style>
 * {{ box-sizing: border-box; margin: 0; padding: 0; }}
 body {{
@@ -285,25 +287,29 @@ body {{
 }}
 .stat {{ color: #aaa; }}
 .stat b {{ color: white; }}
-.stat-high b {{ color: #27AE60; }}
-.stat-med b {{ color: #F39C12; }}
-.stat-low b {{ color: #E74C3C; }}
+.stat-verified b {{ color: #27AE60; }}
+.stat-fixable b {{ color: #3498DB; }}
+.stat-blocked b {{ color: #E74C3C; }}
 .legend {{
     display: flex;
-    gap: 18px;
+    gap: 14px;
     font-size: 12px;
     margin-bottom: 8px;
+    flex-wrap: wrap;
 }}
 .legend span {{ display: flex; align-items: center; gap: 5px; }}
 .swatch {{ width: 14px; height: 14px; display: inline-block; border-radius: 2px; }}
-.swatch-high {{ background: #27AE60; }}
-.swatch-med {{ background: #F39C12; }}
-.swatch-low {{ background: #E74C3C; }}
+.swatch-verified {{ background: #27AE60; }}
+.swatch-fixable {{ background: #3498DB; }}
+.swatch-blocked {{ background: #E74C3C; }}
+.swatch-low {{ background: #E74C3C; opacity: 0.5; }}
+.swatch-nottested {{ background: #888; }}
 .swatch-perf {{ background: #555; }}
 .nav-bar {{
     display: flex;
     gap: 10px;
     margin-bottom: 8px;
+    flex-wrap: wrap;
 }}
 .nav-link {{
     color: #ccc;
@@ -383,25 +389,30 @@ tr:hover {{ background: #2a3a5a !important; }}
 
 <div class="top-bar">
     <h1>macOS VM Migration Candidates</h1>
-    <p class="subtitle">Which macOS functional test suites can move from bare metal to Tart VMs on Mac Minis (16GB, 2 VMs/host)?</p>
+    <p class="subtitle">Validated against try push on VirtualMac2,1 (8GB RAM, 4 cores) — matches Tart on Mac Mini target spec</p>
     <div class="stats">
-        <span class="stat">All macOS suites: <b>{len(classified)}</b></span>
+        <span class="stat">Functional suites: <b>{total_functional}</b></span>
         <span class="stat">Performance (bare metal): <b>{len(perf)}</b></span>
-        <span class="stat">Functional: <b>{total_functional}</b></span>
-        <span class="stat stat-high">High likelihood VM: <b>{len(high)}</b> ({high_t1} T1)</span>
-        <span class="stat stat-med">Medium (investigate): <b>{len(med)}</b> ({med_t1} T1)</span>
-        <span class="stat stat-low">Low (likely bare metal): <b>{len(low)}</b> ({low_t1} T1)</span>
+        <span class="stat stat-verified">Verified on VM: <b>{len(verified)}</b> ({verified_t1} T1)</span>
+        <span class="stat stat-fixable">Fixable: <b>{len(fixable)}</b> ({fixable_t1} T1)</span>
+        <span class="stat stat-blocked">Blocked: <b>{len(blocked)}</b> ({blocked_t1} T1)</span>
+        <span class="stat">Confirmed bare metal: <b>{len(confirmed_low)}</b></span>
+        <span class="stat">Not tested: <b>{len(not_tested)}</b></span>
     </div>
     <div class="legend">
-        <span><span class="swatch swatch-high"></span> High — ready to pilot on VM</span>
-        <span><span class="swatch swatch-med"></span> Medium — needs investigation</span>
-        <span><span class="swatch swatch-low"></span> Low — likely needs bare metal</span>
+        <span><span class="swatch swatch-verified"></span> Verified — passed on VM</span>
+        <span><span class="swatch swatch-fixable"></span> Fixable — known path to resolve</span>
+        <span><span class="swatch swatch-blocked"></span> Blocked — VM-specific issue</span>
+        <span><span class="swatch swatch-low"></span> Confirmed bare metal</span>
+        <span><span class="swatch swatch-nottested"></span> Not tested yet</span>
         <span><span class="swatch swatch-perf"></span> Performance — excluded</span>
     </div>
     <div class="nav-bar">
-        <a href="#high" class="nav-link" style="border-color: #27AE60;">High ({len(high)})</a>
-        <a href="#medium" class="nav-link" style="border-color: #F39C12;">Medium ({len(med)})</a>
-        <a href="#low" class="nav-link" style="border-color: #E74C3C;">Low ({len(low)})</a>
+        <a href="#verified" class="nav-link" style="border-color: #27AE60;">Verified ({len(verified)})</a>
+        <a href="#fixable" class="nav-link" style="border-color: #3498DB;">Fixable ({len(fixable)})</a>
+        <a href="#blocked" class="nav-link" style="border-color: #E74C3C;">Blocked ({len(blocked)})</a>
+        <a href="#confirmed-low" class="nav-link" style="border-color: #8B0000;">Confirmed Bare Metal ({len(confirmed_low)})</a>
+        <a href="#not-tested" class="nav-link" style="border-color: #888;">Not Tested ({len(not_tested)})</a>
         <a href="#perf" class="nav-link" style="border-color: #555;">Performance ({len(perf)})</a>
         <a href="#context" class="nav-link" style="border-color: #4A90D9;">Context</a>
     </div>
@@ -409,45 +420,73 @@ tr:hover {{ background: #2a3a5a !important; }}
 
 <div class="content">
 
-    <div class="section" id="high">
+    <div class="section" id="verified">
         <div class="section-header" style="border-left: 4px solid #27AE60;">
-            <h2 style="color: #27AE60;">High Likelihood — Ready to Pilot</h2>
-            <span class="section-stats">{len(high)} suites ({high_t1} tier 1) — already virtual on Linux/Windows, no GPU/video/heavy resource needs</span>
+            <h2 style="color: #27AE60;">Verified — Passed on VM</h2>
+            <span class="section-stats">{len(verified)} suites ({verified_t1} tier 1) — confirmed working on VirtualMac2,1</span>
         </div>
         <table>
             <thead><tr>
                 <th>Suite</th><th class="center">Tier</th><th class="center">Arch</th>
-                <th class="center">Skips</th><th class="center">All-Plat</th><th>Reason</th>
+                <th class="center">Skips</th><th class="center">All-Plat</th><th>Try Push Result</th>
             </tr></thead>
-            <tbody>{make_rows(high)}</tbody>
+            <tbody>{make_rows(verified)}</tbody>
         </table>
     </div>
 
-    <div class="section" id="medium">
-        <div class="section-header" style="border-left: 4px solid #F39C12;">
-            <h2 style="color: #F39C12;">Medium Likelihood — Needs Investigation</h2>
-            <span class="section-stats">{len(med)} suites ({med_t1} tier 1) — virtual on other platforms but has graphics/media/video dependencies to verify</span>
+    <div class="section" id="fixable">
+        <div class="section-header" style="border-left: 4px solid #3498DB;">
+            <h2 style="color: #3498DB;">Fixable — Known Path to Resolve</h2>
+            <span class="section-stats">{len(fixable)} suites ({fixable_t1} tier 1) — partially working, timeout tuning / test annotation / packaging fixes needed</span>
         </div>
         <table>
             <thead><tr>
                 <th>Suite</th><th class="center">Tier</th><th class="center">Arch</th>
-                <th class="center">Skips</th><th class="center">All-Plat</th><th>Reason</th>
+                <th class="center">Skips</th><th class="center">All-Plat</th><th>Issue + Fix</th>
             </tr></thead>
-            <tbody>{make_rows(med)}</tbody>
+            <tbody>{make_rows(fixable)}</tbody>
         </table>
     </div>
 
-    <div class="section" id="low">
+    <div class="section" id="blocked">
         <div class="section-header" style="border-left: 4px solid #E74C3C;">
-            <h2 style="color: #E74C3C;">Low Likelihood — Likely Needs Bare Metal</h2>
-            <span class="section-stats">{len(low)} suites ({low_t1} tier 1) — heavy CPU/memory needs or requires hardware GL/video</span>
+            <h2 style="color: #E74C3C;">Blocked — VM-Specific Issues</h2>
+            <span class="section-stats">{len(blocked)} suites ({blocked_t1} tier 1) — application hangs, rendering failures, or unclassified issues on macOS VMs</span>
         </div>
         <table>
             <thead><tr>
                 <th>Suite</th><th class="center">Tier</th><th class="center">Arch</th>
-                <th class="center">Skips</th><th class="center">All-Plat</th><th>Reason</th>
+                <th class="center">Skips</th><th class="center">All-Plat</th><th>Root Cause</th>
             </tr></thead>
-            <tbody>{make_rows(low)}</tbody>
+            <tbody>{make_rows(blocked)}</tbody>
+        </table>
+    </div>
+
+    <div class="section" id="confirmed-low">
+        <div class="section-header" style="border-left: 4px solid #8B0000;">
+            <h2 style="color: #CD5C5C;">Confirmed Bare Metal</h2>
+            <span class="section-stats">{len(confirmed_low)} suites — try push confirms these need bare metal</span>
+        </div>
+        <table>
+            <thead><tr>
+                <th>Suite</th><th class="center">Tier</th><th class="center">Arch</th>
+                <th class="center">Skips</th><th class="center">All-Plat</th><th>Root Cause</th>
+            </tr></thead>
+            <tbody>{make_rows(confirmed_low)}</tbody>
+        </table>
+    </div>
+
+    <div class="section" id="not-tested">
+        <div class="section-header" style="border-left: 4px solid #888;">
+            <h2 style="color: #aaa;">Not Tested Yet</h2>
+            <span class="section-stats">{len(not_tested)} suites — not included in try push, classification based on config analysis only</span>
+        </div>
+        <table>
+            <thead><tr>
+                <th>Suite</th><th class="center">Tier</th><th class="center">Arch</th>
+                <th class="center">Skips</th><th class="center">All-Plat</th><th>Config Assessment</th>
+            </tr></thead>
+            <tbody>{make_rows(not_tested)}</tbody>
         </table>
     </div>
 
@@ -467,16 +506,17 @@ tr:hover {{ background: #2a3a5a !important; }}
 
     <div class="context-box" id="context">
         <h2>Context and Methodology</h2>
-        <p><b>Target setup:</b> Tart VMs on Mac Minis (16GB RAM, 2 VMs per host = ~8GB/VM, macOS licensing limit).</p>
-        <p><b>Classification approach:</b></p>
+        <p><b>Try push environment:</b> VirtualMac2,1, 8GB RAM, 4 cores — matches target Tart spec (16GB Mac Mini / 2 VMs).</p>
+        <p><b>Classification (validated):</b></p>
         <ul>
-            <li><b>High:</b> Suite runs as <code>virtualization: virtual</code> on Linux/Windows (default), uses default instance size, no GPU/video/heavy-CPU indicators in name or config.</li>
-            <li><b>Medium:</b> Suite is virtual on other platforms but has graphics (reftest, WebGL, WebGPU, canvas, screenshots), media (video codecs, encrypted media), or loopback video dependencies that need verification on macOS VMs.</li>
-            <li><b>Low:</b> Suite explicitly requires <code>highcpu</code> or <code>large</code> instance sizes, or needs both loopback video and hardware GL — likely exceeds 8GB VM capacity.</li>
-            <li><b>Performance:</b> All talos, browsertime, and awsy suites — require bare metal for stable, reproducible performance numbers.</li>
+            <li><b>Verified:</b> Suite passed on the try push VM. Ready for production VM rollout.</li>
+            <li><b>Fixable:</b> Partially working. Known fixes: timeout tuning for VM slowness, skip window-focus tests, update test expectations, fix packaging bugs.</li>
+            <li><b>Blocked:</b> Real VM-specific issues. The biggest blocker is the <b>browser-chrome / reftest harness hang</b> — Firefox starts, Marionette connects, then nothing for 1000s. This is macOS VM-specific (works on Linux VMs) and affects the largest cluster of suites. Resolving this single issue would unblock crashtest, mochitest-browser-chrome, browser-a11y, browser-translations, browser-media, reftest, and jsreftest.</li>
+            <li><b>Confirmed bare metal:</b> Try push confirms these crash or fail fundamentally on VMs (gtest SIGSEGV, xpcshell crash recovery).</li>
+            <li><b>Not tested:</b> Config analysis suggests these may be VM-capable but they weren't in the try push. Needs future validation.</li>
         </ul>
-        <p><b>Key finding:</b> macOS CI config has no virtualization branching — all tests go to physical Mac pools regardless. The <code>virtualization</code> field only affects Windows worker selection. This analysis uses the Linux/Windows virtual status as a proxy for "doesn't need bare metal."</p>
-        <p><b>Architecture note:</b> Both Intel (Mac Mini) and Apple Silicon (M4 Mac Mini) hardware is in use. 115 tests only have coverage on Intel, 201 only on Apple Silicon. Neither architecture can be fully dropped without coverage loss.</p>
+        <p><b>Key finding from try push:</b> Config-based analysis (virtualization: virtual on Linux/Windows) correctly predicts resource/GPU compatibility but cannot detect macOS VM-specific runtime behaviors like the harness hang and window focus issues. Real try push validation is essential.</p>
+        <p><b>Positive surprise:</b> Tart VMs have working GPU — mochitest-plain-gpu, WebGL extension tests, encrypted media, and print rendering all passed. Several suites originally classified as "Medium" were promoted to "Verified."</p>
     </div>
 
 </div>

@@ -308,6 +308,8 @@
     },
     "t-linux-docker-noscratch-amd": {
       "platforms": [
+        "linux2404-64-artifact/debug",
+        "linux2404-64-artifact/opt",
         "linux2404-64-asan/opt",
         "linux2404-64-ccov/opt",
         "linux2404-64-clang-trunk/opt",
@@ -373,7 +375,7 @@
         "xpcshell"
       ],
       "suite_count": 53,
-      "platform_count": 8,
+      "platform_count": 10,
       "perf_suites": [],
       "functional_suites": [
         "cppunittest",
@@ -518,19 +520,26 @@
     },
     "win11-64-25h2": {
       "platforms": [
-        "windows11-32-24h2-mingwclang/debug",
-        "windows11-32-24h2-mingwclang/opt",
-        "windows11-32-24h2-shippable/opt",
-        "windows11-32-24h2/debug",
-        "windows11-32-24h2/opt",
-        "windows11-64-24h2-asan/opt",
-        "windows11-64-24h2-ccov/opt",
-        "windows11-64-24h2-devedition/opt",
-        "windows11-64-24h2-mingwclang/debug",
-        "windows11-64-24h2-mingwclang/opt",
-        "windows11-64-24h2-shippable/opt",
-        "windows11-64-24h2/debug",
-        "windows11-64-24h2/opt"
+        "windows10-64-2009-qr/debug",
+        "windows10-64-2009-qr/opt",
+        "windows10-64-2009-shippable-qr/opt",
+        "windows11-32-25h2-mingwclang/debug",
+        "windows11-32-25h2-mingwclang/opt",
+        "windows11-32-25h2-shippable/opt",
+        "windows11-32-25h2/debug",
+        "windows11-32-25h2/opt",
+        "windows11-64-24h2-artifact/debug",
+        "windows11-64-24h2-artifact/opt",
+        "windows11-64-24h2-hw-ref-shippable/opt",
+        "windows11-64-24h2-hw-ref/opt",
+        "windows11-64-25h2-asan/opt",
+        "windows11-64-25h2-ccov/opt",
+        "windows11-64-25h2-devedition/opt",
+        "windows11-64-25h2-mingwclang/debug",
+        "windows11-64-25h2-mingwclang/opt",
+        "windows11-64-25h2-shippable/opt",
+        "windows11-64-25h2/debug",
+        "windows11-64-25h2/opt"
       ],
       "suites": [
         "awsy",
@@ -538,11 +547,6 @@
         "awsy-base-dmd",
         "awsy-dmd",
         "awsy-tp6",
-        "cppunittest",
-        "gtest",
-        "jittest",
-        "marionette-integration",
-        "marionette-unittest",
         "mochitest-a11y",
         "mochitest-browser-a11y",
         "mochitest-browser-chrome",
@@ -561,11 +565,7 @@
         "mochitest-webgl2-core",
         "mochitest-webgl2-ext",
         "mochitest-webgpu",
-        "telemetry-tests-client",
-        "test-coverage",
         "test-coverage-wpt",
-        "test-verify",
-        "test-verify-gpu",
         "test-verify-wpt",
         "web-platform-tests",
         "web-platform-tests-backlog",
@@ -576,15 +576,10 @@
         "web-platform-tests-webcodecs",
         "xpcshell"
       ],
-      "suite_count": 42,
-      "platform_count": 13,
+      "suite_count": 33,
+      "platform_count": 20,
       "perf_suites": [],
       "functional_suites": [
-        "cppunittest",
-        "gtest",
-        "jittest",
-        "marionette-integration",
-        "marionette-unittest",
         "mochitest-a11y",
         "mochitest-browser-a11y",
         "mochitest-browser-chrome",
@@ -603,11 +598,7 @@
         "mochitest-webgl2-core",
         "mochitest-webgl2-ext",
         "mochitest-webgpu",
-        "telemetry-tests-client",
-        "test-coverage",
         "test-coverage-wpt",
-        "test-verify",
-        "test-verify-gpu",
         "test-verify-wpt",
         "web-platform-tests",
         "web-platform-tests-backlog",
@@ -619,39 +610,160 @@
         "xpcshell"
       ]
     },
-    "win11-64-24h2": {
+    "t-osx-1500-m4": {
       "platforms": [
-        "windows11-32-24h2-mingwclang/debug",
-        "windows11-32-24h2-shippable/opt",
-        "windows11-32-24h2/debug",
-        "windows11-32-24h2/opt",
-        "windows11-64-24h2-asan/opt",
-        "windows11-64-24h2-ccov/opt",
-        "windows11-64-24h2-devedition/opt",
-        "windows11-64-24h2-mingwclang/debug",
-        "windows11-64-24h2-shippable/opt",
-        "windows11-64-24h2/debug",
-        "windows11-64-24h2/opt"
+        "macosx1500-64-artifact/debug",
+        "macosx1500-64-artifact/opt",
+        "macosx1500-aarch64-shippable/opt",
+        "macosx1500-aarch64/debug",
+        "macosx1500-aarch64/opt"
       ],
       "suites": [
+        "browsertime-benchmark",
+        "browsertime-tp6-essential",
+        "cppunittest",
         "crashtest",
         "firefox-ui-functional",
+        "gtest",
+        "jittest",
         "jsreftest",
+        "marionette-integration",
+        "marionette-unittest",
+        "mochitest-a11y",
+        "mochitest-browser-a11y",
+        "mochitest-browser-chrome",
+        "mochitest-browser-media",
+        "mochitest-browser-translations",
+        "mochitest-chrome",
+        "mochitest-chrome-gpu",
+        "mochitest-devtools-chrome",
+        "mochitest-media",
+        "mochitest-plain",
+        "mochitest-plain-gpu",
+        "mochitest-remote",
+        "mochitest-webgl1-core",
+        "mochitest-webgl1-ext",
+        "mochitest-webgl2-core",
+        "mochitest-webgl2-ext",
         "reftest",
         "telemetry-tests-client",
         "test-verify",
+        "test-verify-gpu",
+        "test-verify-wpt",
+        "web-platform-tests",
+        "web-platform-tests-backlog",
+        "web-platform-tests-canvas",
+        "web-platform-tests-crashtest",
+        "web-platform-tests-eme",
+        "web-platform-tests-print-reftest",
+        "web-platform-tests-reftest",
+        "web-platform-tests-reftest-backlog",
+        "web-platform-tests-wdspec",
+        "web-platform-tests-webcodecs",
+        "xpcshell"
+      ],
+      "suite_count": 42,
+      "platform_count": 5,
+      "perf_suites": [
+        "browsertime-benchmark",
+        "browsertime-tp6-essential"
+      ],
+      "functional_suites": [
+        "cppunittest",
+        "crashtest",
+        "firefox-ui-functional",
+        "gtest",
+        "jittest",
+        "jsreftest",
+        "marionette-integration",
+        "marionette-unittest",
+        "mochitest-a11y",
+        "mochitest-browser-a11y",
+        "mochitest-browser-chrome",
+        "mochitest-browser-media",
+        "mochitest-browser-translations",
+        "mochitest-chrome",
+        "mochitest-chrome-gpu",
+        "mochitest-devtools-chrome",
+        "mochitest-media",
+        "mochitest-plain",
+        "mochitest-plain-gpu",
+        "mochitest-remote",
+        "mochitest-webgl1-core",
+        "mochitest-webgl1-ext",
+        "mochitest-webgl2-core",
+        "mochitest-webgl2-ext",
+        "reftest",
+        "telemetry-tests-client",
+        "test-verify",
+        "test-verify-gpu",
+        "test-verify-wpt",
+        "web-platform-tests",
+        "web-platform-tests-backlog",
+        "web-platform-tests-canvas",
+        "web-platform-tests-crashtest",
+        "web-platform-tests-eme",
+        "web-platform-tests-print-reftest",
+        "web-platform-tests-reftest",
+        "web-platform-tests-reftest-backlog",
+        "web-platform-tests-wdspec",
+        "web-platform-tests-webcodecs",
+        "xpcshell"
+      ]
+    },
+    "unknown-win-platform": {
+      "platforms": [
+        "windows11-32-25h2-mingwclang/debug",
+        "windows11-32-25h2-mingwclang/opt",
+        "windows11-32-25h2-shippable/opt",
+        "windows11-32-25h2/debug",
+        "windows11-32-25h2/opt",
+        "windows11-64-25h2-asan/opt",
+        "windows11-64-25h2-ccov/opt",
+        "windows11-64-25h2-devedition/opt",
+        "windows11-64-25h2-mingwclang/debug",
+        "windows11-64-25h2-mingwclang/opt",
+        "windows11-64-25h2-shippable/opt",
+        "windows11-64-25h2/debug",
+        "windows11-64-25h2/opt",
+        "windows11-aarch64-25h2-devedition/opt",
+        "windows11-aarch64-25h2-shippable/opt",
+        "windows11-aarch64-25h2/debug",
+        "windows11-aarch64-25h2/opt"
+      ],
+      "suites": [
+        "cppunittest",
+        "crashtest",
+        "firefox-ui-functional",
+        "gtest",
+        "jittest",
+        "jsreftest",
+        "marionette-integration",
+        "marionette-unittest",
+        "reftest",
+        "telemetry-tests-client",
+        "test-coverage",
+        "test-verify",
+        "test-verify-gpu",
         "web-platform-tests-eme"
       ],
-      "suite_count": 7,
-      "platform_count": 11,
+      "suite_count": 14,
+      "platform_count": 17,
       "perf_suites": [],
       "functional_suites": [
+        "cppunittest",
         "crashtest",
         "firefox-ui-functional",
+        "gtest",
+        "jittest",
         "jsreftest",
+        "marionette-integration",
+        "marionette-unittest",
         "reftest",
         "telemetry-tests-client",
+        "test-coverage",
         "test-verify",
+        "test-verify-gpu",
         "web-platform-tests-eme"
       ]
     },
@@ -662,18 +774,15 @@
       ],
       "suites": [
         "browsertime-benchmark",
-        "browsertime-video-playback-latency",
-        "mochitest-media"
+        "browsertime-video-playback-latency"
       ],
-      "suite_count": 3,
+      "suite_count": 2,
       "platform_count": 2,
       "perf_suites": [
         "browsertime-benchmark",
         "browsertime-video-playback-latency"
       ],
-      "functional_suites": [
-        "mochitest-media"
-      ]
+      "functional_suites": []
     },
     "win10-64-2009": {
       "platforms": [
@@ -683,28 +792,19 @@
       ],
       "suites": [
         "cppunittest",
-        "gtest",
-        "mochitest-chrome",
-        "mochitest-chrome-gpu",
-        "mochitest-plain",
-        "mochitest-plain-gpu",
-        "xpcshell"
+        "gtest"
       ],
-      "suite_count": 7,
+      "suite_count": 2,
       "platform_count": 3,
       "perf_suites": [],
       "functional_suites": [
         "cppunittest",
-        "gtest",
-        "mochitest-chrome",
-        "mochitest-chrome-gpu",
-        "mochitest-plain",
-        "mochitest-plain-gpu",
-        "xpcshell"
+        "gtest"
       ]
     },
-    "win11-64-25h2-gpu": {
+    "win11-64-24h2": {
       "platforms": [
+        "windows11-64-24h2-asan/opt",
         "windows11-64-24h2-ccov/opt",
         "windows11-64-24h2-devedition/opt",
         "windows11-64-24h2-shippable/opt",
@@ -712,36 +812,17 @@
         "windows11-64-24h2/opt"
       ],
       "suites": [
-        "web-platform-tests-canvas",
-        "web-platform-tests-reftest"
+        "crashtest",
+        "jsreftest",
+        "reftest"
       ],
-      "suite_count": 2,
-      "platform_count": 5,
+      "suite_count": 3,
+      "platform_count": 6,
       "perf_suites": [],
       "functional_suites": [
-        "web-platform-tests-canvas",
-        "web-platform-tests-reftest"
-      ]
-    },
-    "win11-64-25h2-webgpu": {
-      "platforms": [
-        "windows11-64-24h2/debug",
-        "windows11-64-24h2/opt"
-      ],
-      "suites": [
-        "web-platform-tests-webgpu",
-        "web-platform-tests-webgpu-backlog",
-        "web-platform-tests-webgpu-backlog-long",
-        "web-platform-tests-webgpu-long"
-      ],
-      "suite_count": 4,
-      "platform_count": 2,
-      "perf_suites": [],
-      "functional_suites": [
-        "web-platform-tests-webgpu",
-        "web-platform-tests-webgpu-backlog",
-        "web-platform-tests-webgpu-backlog-long",
-        "web-platform-tests-webgpu-long"
+        "crashtest",
+        "jsreftest",
+        "reftest"
       ]
     },
     "win11-64-24h2-hw": {
@@ -893,15 +974,52 @@
       ],
       "functional_suites": []
     },
+    "win11-64-25h2-gpu": {
+      "platforms": [
+        "windows11-64-25h2-ccov/opt",
+        "windows11-64-25h2-devedition/opt",
+        "windows11-64-25h2-shippable/opt",
+        "windows11-64-25h2/debug",
+        "windows11-64-25h2/opt"
+      ],
+      "suites": [
+        "web-platform-tests-canvas",
+        "web-platform-tests-reftest"
+      ],
+      "suite_count": 2,
+      "platform_count": 5,
+      "perf_suites": [],
+      "functional_suites": [
+        "web-platform-tests-canvas",
+        "web-platform-tests-reftest"
+      ]
+    },
+    "win11-64-25h2-webgpu": {
+      "platforms": [
+        "windows11-64-25h2/debug",
+        "windows11-64-25h2/opt"
+      ],
+      "suites": [
+        "web-platform-tests-webgpu",
+        "web-platform-tests-webgpu-backlog",
+        "web-platform-tests-webgpu-backlog-long",
+        "web-platform-tests-webgpu-long"
+      ],
+      "suite_count": 4,
+      "platform_count": 2,
+      "perf_suites": [],
+      "functional_suites": [
+        "web-platform-tests-webgpu",
+        "web-platform-tests-webgpu-backlog",
+        "web-platform-tests-webgpu-backlog-long",
+        "web-platform-tests-webgpu-long"
+      ]
+    },
     "win11-64-25h2-large": {
       "platforms": [
-        "windows11-64-24h2-asan/opt"
+        "windows11-64-25h2-asan/opt"
       ],
       "suites": [
-        "cppunittest",
-        "gtest",
-        "marionette-integration",
-        "marionette-unittest",
         "mochitest-a11y",
         "mochitest-browser-a11y",
         "mochitest-browser-chrome",
@@ -920,14 +1038,10 @@
         "mochitest-webgl2-ext",
         "xpcshell"
       ],
-      "suite_count": 21,
+      "suite_count": 17,
       "platform_count": 1,
       "perf_suites": [],
       "functional_suites": [
-        "cppunittest",
-        "gtest",
-        "marionette-integration",
-        "marionette-unittest",
         "mochitest-a11y",
         "mochitest-browser-a11y",
         "mochitest-browser-chrome",
@@ -944,131 +1058,6 @@
         "mochitest-webgl1-ext",
         "mochitest-webgl2-core",
         "mochitest-webgl2-ext",
-        "xpcshell"
-      ]
-    },
-    "win11-64-24h2-gpu": {
-      "platforms": [
-        "windows11-64-24h2-asan/opt"
-      ],
-      "suites": [
-        "test-verify-gpu"
-      ],
-      "suite_count": 1,
-      "platform_count": 1,
-      "perf_suites": [],
-      "functional_suites": [
-        "test-verify-gpu"
-      ]
-    },
-    "win11-a64-25h2": {
-      "platforms": [
-        "windows11-aarch64-24h2-devedition/opt",
-        "windows11-aarch64-24h2-shippable/opt",
-        "windows11-aarch64-24h2/debug",
-        "windows11-aarch64-24h2/opt"
-      ],
-      "suites": [
-        "cppunittest"
-      ],
-      "suite_count": 1,
-      "platform_count": 4,
-      "perf_suites": [],
-      "functional_suites": [
-        "cppunittest"
-      ]
-    },
-    "t-osx-1500-m4": {
-      "platforms": [
-        "macosx1500-aarch64-shippable/opt",
-        "macosx1500-aarch64/debug"
-      ],
-      "suites": [
-        "browsertime-benchmark",
-        "browsertime-tp6-essential",
-        "cppunittest",
-        "crashtest",
-        "firefox-ui-functional",
-        "gtest",
-        "jittest",
-        "jsreftest",
-        "marionette-integration",
-        "marionette-unittest",
-        "mochitest-a11y",
-        "mochitest-browser-a11y",
-        "mochitest-browser-chrome",
-        "mochitest-browser-media",
-        "mochitest-browser-translations",
-        "mochitest-chrome",
-        "mochitest-chrome-gpu",
-        "mochitest-devtools-chrome",
-        "mochitest-media",
-        "mochitest-plain",
-        "mochitest-plain-gpu",
-        "mochitest-remote",
-        "mochitest-webgl1-core",
-        "mochitest-webgl1-ext",
-        "mochitest-webgl2-core",
-        "mochitest-webgl2-ext",
-        "reftest",
-        "telemetry-tests-client",
-        "test-verify",
-        "test-verify-gpu",
-        "test-verify-wpt",
-        "web-platform-tests",
-        "web-platform-tests-canvas",
-        "web-platform-tests-crashtest",
-        "web-platform-tests-eme",
-        "web-platform-tests-print-reftest",
-        "web-platform-tests-reftest",
-        "web-platform-tests-wdspec",
-        "web-platform-tests-webcodecs",
-        "xpcshell"
-      ],
-      "suite_count": 40,
-      "platform_count": 2,
-      "perf_suites": [
-        "browsertime-benchmark",
-        "browsertime-tp6-essential"
-      ],
-      "functional_suites": [
-        "cppunittest",
-        "crashtest",
-        "firefox-ui-functional",
-        "gtest",
-        "jittest",
-        "jsreftest",
-        "marionette-integration",
-        "marionette-unittest",
-        "mochitest-a11y",
-        "mochitest-browser-a11y",
-        "mochitest-browser-chrome",
-        "mochitest-browser-media",
-        "mochitest-browser-translations",
-        "mochitest-chrome",
-        "mochitest-chrome-gpu",
-        "mochitest-devtools-chrome",
-        "mochitest-media",
-        "mochitest-plain",
-        "mochitest-plain-gpu",
-        "mochitest-remote",
-        "mochitest-webgl1-core",
-        "mochitest-webgl1-ext",
-        "mochitest-webgl2-core",
-        "mochitest-webgl2-ext",
-        "reftest",
-        "telemetry-tests-client",
-        "test-verify",
-        "test-verify-gpu",
-        "test-verify-wpt",
-        "web-platform-tests",
-        "web-platform-tests-canvas",
-        "web-platform-tests-crashtest",
-        "web-platform-tests-eme",
-        "web-platform-tests-print-reftest",
-        "web-platform-tests-reftest",
-        "web-platform-tests-wdspec",
-        "web-platform-tests-webcodecs",
         "xpcshell"
       ]
     },
@@ -1176,7 +1165,6 @@
         "test-verify",
         "test-verify-gpu",
         "test-verify-wpt",
-        "web-platform-tests",
         "web-platform-tests-backlog",
         "web-platform-tests-canvas",
         "web-platform-tests-crashtest",
@@ -1192,7 +1180,7 @@
         "web-platform-tests-webgpu-long",
         "xpcshell"
       ],
-      "suite_count": 110,
+      "suite_count": 109,
       "platform_count": 5,
       "perf_suites": [
         "browsertime-benchmark",
@@ -1287,7 +1275,6 @@
         "test-verify",
         "test-verify-gpu",
         "test-verify-wpt",
-        "web-platform-tests",
         "web-platform-tests-backlog",
         "web-platform-tests-canvas",
         "web-platform-tests-crashtest",
@@ -2280,7 +2267,67 @@
       ],
       "os_family": "Linux"
     },
-    "windows11-32-24h2-shippable/opt": {
+    "linux2404-64-artifact/opt": {
+      "suites": [
+        "mochitest-browser-chrome",
+        "mochitest-chrome",
+        "mochitest-devtools-chrome",
+        "mochitest-plain",
+        "xpcshell"
+      ],
+      "os_family": "Linux"
+    },
+    "linux2404-64-artifact/debug": {
+      "suites": [
+        "mochitest-browser-chrome",
+        "mochitest-chrome",
+        "mochitest-devtools-chrome",
+        "mochitest-plain",
+        "xpcshell"
+      ],
+      "os_family": "Linux"
+    },
+    "windows11-64-24h2-artifact/opt": {
+      "suites": [
+        "mochitest-browser-chrome",
+        "mochitest-chrome",
+        "mochitest-devtools-chrome",
+        "mochitest-plain",
+        "xpcshell"
+      ],
+      "os_family": "Windows"
+    },
+    "windows11-64-24h2-artifact/debug": {
+      "suites": [
+        "mochitest-browser-chrome",
+        "mochitest-chrome",
+        "mochitest-devtools-chrome",
+        "mochitest-plain",
+        "xpcshell"
+      ],
+      "os_family": "Windows"
+    },
+    "macosx1500-64-artifact/opt": {
+      "suites": [
+        "mochitest-browser-chrome",
+        "mochitest-chrome",
+        "mochitest-devtools-chrome",
+        "mochitest-plain",
+        "xpcshell"
+      ],
+      "os_family": "macOS"
+    },
+    "macosx1500-64-artifact/debug": {
+      "suites": [
+        "mochitest-browser-chrome",
+        "mochitest-chrome",
+        "mochitest-devtools-chrome",
+        "mochitest-plain",
+        "xpcshell"
+      ],
+      "os_family": "macOS"
+    },
+    "windows11-32-25h2-shippable/opt": {
       "suites": [
         "cppunittest",
         "crashtest",
@@ -2306,7 +2353,7 @@
       ],
       "os_family": "Windows"
     },
-    "windows11-32-24h2/opt": {
+    "windows11-32-25h2/opt": {
       "suites": [
         "cppunittest",
         "crashtest",
@@ -2332,7 +2379,7 @@
       ],
       "os_family": "Windows"
     },
-    "windows11-32-24h2/debug": {
+    "windows11-32-25h2/debug": {
       "suites": [
         "cppunittest",
         "crashtest",
@@ -2357,7 +2404,7 @@
       ],
       "os_family": "Windows"
     },
-    "windows11-32-24h2-mingwclang/debug": {
+    "windows11-32-25h2-mingwclang/debug": {
       "suites": [
         "cppunittest",
         "firefox-ui-functional",
@@ -2372,7 +2419,7 @@
       ],
       "os_family": "Windows"
     },
-    "windows11-32-24h2-mingwclang/opt": {
+    "windows11-32-25h2-mingwclang/opt": {
       "suites": [
         "cppunittest",
         "mochitest-chrome-gpu",
@@ -2434,103 +2481,22 @@
     },
     "windows11-64-24h2-ccov/opt": {
       "suites": [
-        "cppunittest",
         "crashtest",
-        "firefox-ui-functional",
-        "gtest",
-        "jittest",
         "jsreftest",
-        "marionette-integration",
-        "marionette-unittest",
-        "mochitest-a11y",
-        "mochitest-browser-a11y",
-        "mochitest-browser-chrome",
-        "mochitest-browser-media",
-        "mochitest-browser-screenshots",
-        "mochitest-browser-translations",
-        "mochitest-chrome",
-        "mochitest-chrome-gpu",
-        "mochitest-devtools-chrome",
-        "mochitest-media",
-        "mochitest-plain",
-        "mochitest-plain-gpu",
-        "mochitest-remote",
-        "mochitest-webgl1-core",
-        "mochitest-webgl1-ext",
-        "mochitest-webgl2-core",
-        "mochitest-webgl2-ext",
-        "reftest",
-        "telemetry-tests-client",
-        "test-coverage",
-        "test-coverage-wpt",
-        "test-verify",
-        "test-verify-gpu",
-        "test-verify-wpt",
-        "web-platform-tests",
-        "web-platform-tests-crashtest",
-        "web-platform-tests-eme",
-        "web-platform-tests-print-reftest",
-        "web-platform-tests-reftest",
-        "web-platform-tests-wdspec",
-        "web-platform-tests-webcodecs",
-        "xpcshell"
+        "reftest"
       ],
       "os_family": "Windows"
     },
     "windows11-64-24h2/debug": {
       "suites": [
-        "cppunittest",
         "crashtest",
-        "firefox-ui-functional",
-        "gtest",
         "jsreftest",
-        "marionette-integration",
-        "marionette-unittest",
-        "mochitest-a11y",
-        "mochitest-browser-a11y",
-        "mochitest-browser-chrome",
-        "mochitest-browser-media",
-        "mochitest-browser-translations",
-        "mochitest-chrome",
-        "mochitest-chrome-gpu",
-        "mochitest-devtools-chrome",
-        "mochitest-media",
-        "mochitest-plain",
-        "mochitest-plain-gpu",
-        "mochitest-remote",
-        "mochitest-webgl1-core",
-        "mochitest-webgl1-ext",
-        "mochitest-webgl2-core",
-        "mochitest-webgl2-ext",
-        "mochitest-webgpu",
-        "reftest",
-        "telemetry-tests-client",
-        "test-verify",
-        "test-verify-gpu",
-        "test-verify-wpt",
-        "web-platform-tests",
-        "web-platform-tests-canvas",
-        "web-platform-tests-crashtest",
-        "web-platform-tests-eme",
-        "web-platform-tests-print-reftest",
-        "web-platform-tests-reftest",
-        "web-platform-tests-wdspec",
-        "web-platform-tests-webcodecs",
-        "web-platform-tests-webgpu",
-        "web-platform-tests-webgpu-backlog",
-        "web-platform-tests-webgpu-backlog-long",
-        "web-platform-tests-webgpu-long",
-        "xpcshell"
+        "reftest"
       ],
       "os_family": "Windows"
     },
     "windows11-64-24h2/opt": {
       "suites": [
-        "awsy",
-        "awsy-base",
-        "awsy-base-dmd",
-        "awsy-dmd",
-        "awsy-tp6",
         "browsertime-benchmark",
         "browsertime-benchmark-wasm",
         "browsertime-custom",
@@ -2555,31 +2521,8 @@
         "browsertime-webcodecs",
         "browsertime-youtube-playback",
         "browsertime-youtube-playback-power",
-        "cppunittest",
         "crashtest",
-        "firefox-ui-functional",
-        "gtest",
         "jsreftest",
-        "marionette-integration",
-        "marionette-unittest",
-        "mochitest-a11y",
-        "mochitest-browser-a11y",
-        "mochitest-browser-chrome",
-        "mochitest-browser-media",
-        "mochitest-browser-screenshots",
-        "mochitest-browser-translations",
-        "mochitest-chrome",
-        "mochitest-chrome-gpu",
-        "mochitest-devtools-chrome",
-        "mochitest-media",
-        "mochitest-plain",
-        "mochitest-plain-gpu",
-        "mochitest-remote",
-        "mochitest-webgl1-core",
-        "mochitest-webgl1-ext",
-        "mochitest-webgl2-core",
-        "mochitest-webgl2-ext",
-        "mochitest-webgpu",
         "reftest",
         "talos-bcv",
         "talos-chrome",
@@ -2600,36 +2543,12 @@
         "talos-tabswitch",
         "talos-tp5o",
         "talos-webgl",
-        "talos-xperf",
-        "telemetry-tests-client",
-        "test-verify",
-        "test-verify-gpu",
-        "test-verify-wpt",
-        "web-platform-tests",
-        "web-platform-tests-backlog",
-        "web-platform-tests-canvas",
-        "web-platform-tests-crashtest",
-        "web-platform-tests-eme",
-        "web-platform-tests-print-reftest",
-        "web-platform-tests-reftest",
-        "web-platform-tests-reftest-backlog",
-        "web-platform-tests-wdspec",
-        "web-platform-tests-webcodecs",
-        "web-platform-tests-webgpu",
-        "web-platform-tests-webgpu-backlog",
-        "web-platform-tests-webgpu-backlog-long",
-        "web-platform-tests-webgpu-long",
-        "xpcshell"
+        "talos-xperf"
       ],
       "os_family": "Windows"
     },
     "windows11-64-24h2-shippable/opt": {
       "suites": [
-        "awsy",
-        "awsy-base",
-        "awsy-base-dmd",
-        "awsy-dmd",
-        "awsy-tp6",
         "browsertime-benchmark",
         "browsertime-benchmark-wasm",
         "browsertime-custom",
@@ -2654,30 +2573,8 @@
         "browsertime-webcodecs",
         "browsertime-youtube-playback",
         "browsertime-youtube-playback-power",
-        "cppunittest",
         "crashtest",
-        "firefox-ui-functional",
-        "gtest",
         "jsreftest",
-        "marionette-integration",
-        "marionette-unittest",
-        "mochitest-a11y",
-        "mochitest-browser-a11y",
-        "mochitest-browser-chrome",
-        "mochitest-browser-media",
-        "mochitest-browser-screenshots",
-        "mochitest-browser-translations",
-        "mochitest-chrome",
-        "mochitest-chrome-gpu",
-        "mochitest-devtools-chrome",
-        "mochitest-media",
-        "mochitest-plain",
-        "mochitest-plain-gpu",
-        "mochitest-remote",
-        "mochitest-webgl1-core",
-        "mochitest-webgl1-ext",
-        "mochitest-webgl2-core",
-        "mochitest-webgl2-ext",
         "reftest",
         "talos-bcv",
         "talos-bcv-profiling",
@@ -2715,123 +2612,23 @@
         "talos-tp5o-profiling",
         "talos-webgl",
         "talos-webgl-profiling",
-        "talos-xperf",
-        "telemetry-tests-client",
-        "test-verify",
-        "test-verify-gpu",
-        "test-verify-wpt",
-        "web-platform-tests",
-        "web-platform-tests-backlog",
-        "web-platform-tests-canvas",
-        "web-platform-tests-crashtest",
-        "web-platform-tests-eme",
-        "web-platform-tests-print-reftest",
-        "web-platform-tests-reftest",
-        "web-platform-tests-reftest-backlog",
-        "web-platform-tests-wdspec",
-        "web-platform-tests-webcodecs",
-        "xpcshell"
+        "talos-xperf"
       ],
       "os_family": "Windows"
     },
     "windows11-64-24h2-devedition/opt": {
       "suites": [
-        "cppunittest",
         "crashtest",
-        "firefox-ui-functional",
-        "gtest",
         "jsreftest",
-        "marionette-integration",
-        "marionette-unittest",
-        "mochitest-a11y",
-        "mochitest-browser-a11y",
-        "mochitest-browser-chrome",
-        "mochitest-browser-media",
-        "mochitest-browser-screenshots",
-        "mochitest-browser-translations",
-        "mochitest-chrome",
-        "mochitest-chrome-gpu",
-        "mochitest-devtools-chrome",
-        "mochitest-media",
-        "mochitest-plain",
-        "mochitest-plain-gpu",
-        "mochitest-remote",
-        "mochitest-webgl1-core",
-        "mochitest-webgl1-ext",
-        "mochitest-webgl2-core",
-        "mochitest-webgl2-ext",
-        "reftest",
-        "telemetry-tests-client",
-        "test-verify",
-        "test-verify-gpu",
-        "test-verify-wpt",
-        "web-platform-tests",
-        "web-platform-tests-canvas",
-        "web-platform-tests-crashtest",
-        "web-platform-tests-eme",
-        "web-platform-tests-print-reftest",
-        "web-platform-tests-reftest",
-        "web-platform-tests-wdspec",
-        "web-platform-tests-webcodecs",
-        "xpcshell"
+        "reftest"
       ],
       "os_family": "Windows"
     },
     "windows11-64-24h2-asan/opt": {
       "suites": [
-        "cppunittest",
         "crashtest",
-        "firefox-ui-functional",
-        "gtest",
         "jsreftest",
-        "marionette-integration",
-        "marionette-unittest",
-        "mochitest-a11y",
-        "mochitest-browser-a11y",
-        "mochitest-browser-chrome",
-        "mochitest-browser-media",
-        "mochitest-browser-translations",
-        "mochitest-chrome",
-        "mochitest-chrome-gpu",
-        "mochitest-devtools-chrome",
-        "mochitest-media",
-        "mochitest-plain",
-        "mochitest-plain-gpu",
-        "mochitest-remote",
-        "mochitest-webgl1-core",
-        "mochitest-webgl1-ext",
-        "mochitest-webgl2-core",
-        "mochitest-webgl2-ext",
-        "reftest",
-        "telemetry-tests-client",
-        "test-verify",
-        "test-verify-gpu",
-        "test-verify-wpt",
-        "xpcshell"
-      ],
-      "os_family": "Windows"
-    },
-    "windows11-64-24h2-mingwclang/debug": {
-      "suites": [
-        "cppunittest",
-        "firefox-ui-functional",
-        "mochitest-a11y",
-        "mochitest-chrome-gpu",
-        "mochitest-plain-gpu",
-        "mochitest-webgl1-core",
-        "mochitest-webgl1-ext",
-        "mochitest-webgl2-core",
-        "mochitest-webgl2-ext",
-        "reftest",
-        "telemetry-tests-client"
-      ],
-      "os_family": "Windows"
-    },
-    "windows11-64-24h2-mingwclang/opt": {
-      "suites": [
-        "cppunittest",
-        "mochitest-chrome-gpu",
-        "mochitest-plain-gpu"
+        "reftest"
       ],
       "os_family": "Windows"
     },
@@ -2864,25 +2661,299 @@
       ],
       "os_family": "Windows"
     },
-    "windows11-aarch64-24h2-shippable/opt": {
+    "windows11-64-25h2-ccov/opt": {
+      "suites": [
+        "cppunittest",
+        "gtest",
+        "jittest",
+        "marionette-integration",
+        "marionette-unittest",
+        "mochitest-a11y",
+        "mochitest-browser-a11y",
+        "mochitest-browser-chrome",
+        "mochitest-browser-media",
+        "mochitest-browser-screenshots",
+        "mochitest-browser-translations",
+        "mochitest-chrome",
+        "mochitest-chrome-gpu",
+        "mochitest-devtools-chrome",
+        "mochitest-media",
+        "mochitest-plain",
+        "mochitest-plain-gpu",
+        "mochitest-remote",
+        "mochitest-webgl1-core",
+        "mochitest-webgl1-ext",
+        "mochitest-webgl2-core",
+        "mochitest-webgl2-ext",
+        "telemetry-tests-client",
+        "test-coverage",
+        "test-coverage-wpt",
+        "test-verify",
+        "test-verify-gpu",
+        "test-verify-wpt",
+        "web-platform-tests",
+        "web-platform-tests-crashtest",
+        "web-platform-tests-eme",
+        "web-platform-tests-print-reftest",
+        "web-platform-tests-reftest",
+        "web-platform-tests-wdspec",
+        "web-platform-tests-webcodecs",
+        "xpcshell"
+      ],
+      "os_family": "Windows"
+    },
+    "windows11-64-25h2/debug": {
+      "suites": [
+        "cppunittest",
+        "gtest",
+        "marionette-integration",
+        "marionette-unittest",
+        "mochitest-a11y",
+        "mochitest-browser-a11y",
+        "mochitest-browser-chrome",
+        "mochitest-browser-media",
+        "mochitest-browser-translations",
+        "mochitest-chrome",
+        "mochitest-chrome-gpu",
+        "mochitest-devtools-chrome",
+        "mochitest-media",
+        "mochitest-plain",
+        "mochitest-plain-gpu",
+        "mochitest-remote",
+        "mochitest-webgl1-core",
+        "mochitest-webgl1-ext",
+        "mochitest-webgl2-core",
+        "mochitest-webgl2-ext",
+        "mochitest-webgpu",
+        "telemetry-tests-client",
+        "test-verify",
+        "test-verify-gpu",
+        "test-verify-wpt",
+        "web-platform-tests",
+        "web-platform-tests-canvas",
+        "web-platform-tests-crashtest",
+        "web-platform-tests-eme",
+        "web-platform-tests-print-reftest",
+        "web-platform-tests-reftest",
+        "web-platform-tests-wdspec",
+        "web-platform-tests-webcodecs",
+        "web-platform-tests-webgpu",
+        "web-platform-tests-webgpu-backlog",
+        "web-platform-tests-webgpu-backlog-long",
+        "web-platform-tests-webgpu-long",
+        "xpcshell"
+      ],
+      "os_family": "Windows"
+    },
+    "windows11-64-25h2/opt": {
+      "suites": [
+        "awsy",
+        "awsy-base",
+        "awsy-base-dmd",
+        "awsy-dmd",
+        "awsy-tp6",
+        "cppunittest",
+        "gtest",
+        "marionette-integration",
+        "marionette-unittest",
+        "mochitest-a11y",
+        "mochitest-browser-a11y",
+        "mochitest-browser-chrome",
+        "mochitest-browser-media",
+        "mochitest-browser-screenshots",
+        "mochitest-browser-translations",
+        "mochitest-chrome",
+        "mochitest-chrome-gpu",
+        "mochitest-devtools-chrome",
+        "mochitest-media",
+        "mochitest-plain",
+        "mochitest-plain-gpu",
+        "mochitest-remote",
+        "mochitest-webgl1-core",
+        "mochitest-webgl1-ext",
+        "mochitest-webgl2-core",
+        "mochitest-webgl2-ext",
+        "mochitest-webgpu",
+        "telemetry-tests-client",
+        "test-verify",
+        "test-verify-gpu",
+        "test-verify-wpt",
+        "web-platform-tests",
+        "web-platform-tests-backlog",
+        "web-platform-tests-canvas",
+        "web-platform-tests-crashtest",
+        "web-platform-tests-eme",
+        "web-platform-tests-print-reftest",
+        "web-platform-tests-reftest",
+        "web-platform-tests-reftest-backlog",
+        "web-platform-tests-wdspec",
+        "web-platform-tests-webcodecs",
+        "web-platform-tests-webgpu",
+        "web-platform-tests-webgpu-backlog",
+        "web-platform-tests-webgpu-backlog-long",
+        "web-platform-tests-webgpu-long",
+        "xpcshell"
+      ],
+      "os_family": "Windows"
+    },
+    "windows11-64-25h2-shippable/opt": {
+      "suites": [
+        "awsy",
+        "awsy-base",
+        "awsy-base-dmd",
+        "awsy-dmd",
+        "awsy-tp6",
+        "cppunittest",
+        "gtest",
+        "marionette-integration",
+        "marionette-unittest",
+        "mochitest-a11y",
+        "mochitest-browser-a11y",
+        "mochitest-browser-chrome",
+        "mochitest-browser-media",
+        "mochitest-browser-screenshots",
+        "mochitest-browser-translations",
+        "mochitest-chrome",
+        "mochitest-chrome-gpu",
+        "mochitest-devtools-chrome",
+        "mochitest-media",
+        "mochitest-plain",
+        "mochitest-plain-gpu",
+        "mochitest-remote",
+        "mochitest-webgl1-core",
+        "mochitest-webgl1-ext",
+        "mochitest-webgl2-core",
+        "mochitest-webgl2-ext",
+        "telemetry-tests-client",
+        "test-verify",
+        "test-verify-gpu",
+        "test-verify-wpt",
+        "web-platform-tests",
+        "web-platform-tests-backlog",
+        "web-platform-tests-canvas",
+        "web-platform-tests-crashtest",
+        "web-platform-tests-eme",
+        "web-platform-tests-print-reftest",
+        "web-platform-tests-reftest",
+        "web-platform-tests-reftest-backlog",
+        "web-platform-tests-wdspec",
+        "web-platform-tests-webcodecs",
+        "xpcshell"
+      ],
+      "os_family": "Windows"
+    },
+    "windows11-64-25h2-devedition/opt": {
+      "suites": [
+        "cppunittest",
+        "gtest",
+        "marionette-integration",
+        "marionette-unittest",
+        "mochitest-a11y",
+        "mochitest-browser-a11y",
+        "mochitest-browser-chrome",
+        "mochitest-browser-media",
+        "mochitest-browser-screenshots",
+        "mochitest-browser-translations",
+        "mochitest-chrome",
+        "mochitest-chrome-gpu",
+        "mochitest-devtools-chrome",
+        "mochitest-media",
+        "mochitest-plain",
+        "mochitest-plain-gpu",
+        "mochitest-remote",
+        "mochitest-webgl1-core",
+        "mochitest-webgl1-ext",
+        "mochitest-webgl2-core",
+        "mochitest-webgl2-ext",
+        "telemetry-tests-client",
+        "test-verify",
+        "test-verify-gpu",
+        "test-verify-wpt",
+        "web-platform-tests",
+        "web-platform-tests-canvas",
+        "web-platform-tests-crashtest",
+        "web-platform-tests-eme",
+        "web-platform-tests-print-reftest",
+        "web-platform-tests-reftest",
+        "web-platform-tests-wdspec",
+        "web-platform-tests-webcodecs",
+        "xpcshell"
+      ],
+      "os_family": "Windows"
+    },
+    "windows11-64-25h2-asan/opt": {
+      "suites": [
+        "cppunittest",
+        "gtest",
+        "marionette-integration",
+        "marionette-unittest",
+        "mochitest-a11y",
+        "mochitest-browser-a11y",
+        "mochitest-browser-chrome",
+        "mochitest-browser-media",
+        "mochitest-browser-translations",
+        "mochitest-chrome",
+        "mochitest-chrome-gpu",
+        "mochitest-devtools-chrome",
+        "mochitest-media",
+        "mochitest-plain",
+        "mochitest-plain-gpu",
+        "mochitest-remote",
+        "mochitest-webgl1-core",
+        "mochitest-webgl1-ext",
+        "mochitest-webgl2-core",
+        "mochitest-webgl2-ext",
+        "telemetry-tests-client",
+        "test-verify",
+        "test-verify-gpu",
+        "test-verify-wpt",
+        "xpcshell"
+      ],
+      "os_family": "Windows"
+    },
+    "windows11-64-25h2-mingwclang/debug": {
+      "suites": [
+        "cppunittest",
+        "firefox-ui-functional",
+        "mochitest-a11y",
+        "mochitest-chrome-gpu",
+        "mochitest-plain-gpu",
+        "mochitest-webgl1-core",
+        "mochitest-webgl1-ext",
+        "mochitest-webgl2-core",
+        "mochitest-webgl2-ext",
+        "reftest",
+        "telemetry-tests-client"
+      ],
+      "os_family": "Windows"
+    },
+    "windows11-64-25h2-mingwclang/opt": {
+      "suites": [
+        "cppunittest",
+        "mochitest-chrome-gpu",
+        "mochitest-plain-gpu"
+      ],
+      "os_family": "Windows"
+    },
+    "windows11-aarch64-25h2-shippable/opt": {
       "suites": [
         "cppunittest"
       ],
       "os_family": "Windows"
     },
-    "windows11-aarch64-24h2-devedition/opt": {
+    "windows11-aarch64-25h2-devedition/opt": {
       "suites": [
         "cppunittest"
       ],
       "os_family": "Windows"
     },
-    "windows11-aarch64-24h2/opt": {
+    "windows11-aarch64-25h2/opt": {
       "suites": [
         "cppunittest"
       ],
       "os_family": "Windows"
     },
-    "windows11-aarch64-24h2/debug": {
+    "windows11-aarch64-25h2/debug": {
       "suites": [
         "cppunittest"
       ],
@@ -2892,7 +2963,16 @@
       "suites": [
         "cppunittest",
         "jittest",
-        "mochitest-media"
+        "mochitest-media",
+        "web-platform-tests"
+      ],
+      "os_family": "macOS"
+    },
+    "macosx1500-aarch64/opt": {
+      "suites": [
+        "cppunittest",
+        "mochitest-media",
+        "web-platform-tests"
       ],
       "os_family": "macOS"
     },
@@ -2930,11 +3010,13 @@
         "test-verify-gpu",
         "test-verify-wpt",
         "web-platform-tests",
+        "web-platform-tests-backlog",
         "web-platform-tests-canvas",
         "web-platform-tests-crashtest",
         "web-platform-tests-eme",
         "web-platform-tests-print-reftest",
         "web-platform-tests-reftest",
+        "web-platform-tests-reftest-backlog",
         "web-platform-tests-wdspec",
         "web-platform-tests-webcodecs",
         "xpcshell"
@@ -3067,7 +3149,6 @@
         "test-verify",
         "test-verify-gpu",
         "test-verify-wpt",
-        "web-platform-tests",
         "web-platform-tests-backlog",
         "web-platform-tests-canvas",
         "web-platform-tests-crashtest",
@@ -3116,7 +3197,6 @@
         "test-verify",
         "test-verify-gpu",
         "test-verify-wpt",
-        "web-platform-tests",
         "web-platform-tests-canvas",
         "web-platform-tests-crashtest",
         "web-platform-tests-eme",
@@ -3187,7 +3267,6 @@
         "test-verify",
         "test-verify-gpu",
         "test-verify-wpt",
-        "web-platform-tests",
         "web-platform-tests-backlog",
         "web-platform-tests-canvas",
         "web-platform-tests-crashtest",
@@ -3236,7 +3315,6 @@
         "test-verify",
         "test-verify-gpu",
         "test-verify-wpt",
-        "web-platform-tests",
         "web-platform-tests-canvas",
         "web-platform-tests-crashtest",
         "web-platform-tests-eme",
